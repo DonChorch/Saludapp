@@ -277,44 +277,6 @@
       to   { opacity: 1; transform: translateY(0); }
     }
 
-    /* ─── Stats Bar ──────────────────────────────────── */
-    .stats-bar {
-      background: var(--rojo);
-      padding: 28px 0;
-      border-bottom: 3px solid var(--dorado);
-    }
-
-    .stats-inner {
-      display: grid;
-      grid-template-columns: repeat(3, 1fr);
-      gap: 0;
-    }
-
-    .stat-item {
-      text-align: center;
-      padding: 8px 20px;
-      border-right: 1px solid rgba(245,230,211,0.2);
-    }
-
-    .stat-item:last-child {
-      border-right: none;
-    }
-
-    .stat-number {
-      font-family: 'Playfair Display', serif;
-      font-size: 36px;
-      color: var(--dorado);
-      font-weight: 700;
-      line-height: 1;
-    }
-
-    .stat-label {
-      font-size: 11px;
-      letter-spacing: 3px;
-      text-transform: uppercase;
-      color: rgba(245,230,211,0.7);
-      margin-top: 6px;
-    }
 
     /* ─── Sobre Nosotros ─────────────────────────────── */
     .about {
@@ -533,6 +495,34 @@
       border-radius: 100px;
     }
 
+    /* ─── Platos Lista ───────────────────────────────── */
+    .platos-lista {
+      list-style: none;
+      margin-top: 48px;
+      max-width: 600px;
+      margin-left: auto;
+      margin-right: auto;
+    }
+
+    .platos-lista li {
+      font-family: 'Playfair Display', serif;
+      font-size: clamp(20px, 3vw, 28px);
+      color: var(--carbon);
+      text-align: center;
+      padding: 20px 0;
+      border-bottom: 1px solid rgba(168,25,46,0.12);
+      letter-spacing: 1px;
+      transition: color 0.25s;
+    }
+
+    .platos-lista li:first-child {
+      border-top: 1px solid rgba(168,25,46,0.12);
+    }
+
+    .platos-lista li:hover {
+      color: var(--rojo);
+    }
+
     /* ─── Reserva CTA ────────────────────────────────── */
     .reserva-cta {
       padding: 90px 0;
@@ -715,19 +705,8 @@
     @media (max-width: 900px) {
       .about-inner,
       .menu-grid,
-      .contact-grid,
-      .stats-inner {
+      .contact-grid {
         grid-template-columns: 1fr;
-      }
-
-      .stat-item {
-        border-right: none;
-        border-bottom: 1px solid rgba(245,230,211,0.2);
-        padding: 16px;
-      }
-
-      .stat-item:last-child {
-        border-bottom: none;
       }
 
       .footer-inner {
@@ -798,23 +777,6 @@
     </div>
   </section>
 
-  <!-- ─── Stats Bar ─── -->
-  <div class="stats-bar">
-    <div class="container stats-inner">
-      <div class="stat-item">
-        <div class="stat-number">15+</div>
-        <div class="stat-label">Años de experiencia</div>
-      </div>
-      <div class="stat-item">
-        <div class="stat-number">40+</div>
-        <div class="stat-label">Platos en carta</div>
-      </div>
-      <div class="stat-item">
-        <div class="stat-number">100%</div>
-        <div class="stat-label">Ingredientes frescos</div>
-      </div>
-    </div>
-  </div>
 
   <!-- ─── Sobre Nosotros ─── -->
   <section class="about" id="sobre">
@@ -848,57 +810,11 @@
         <h2 class="section-title">Lo mejor de nuestra carta</h2>
         <div class="divider"></div>
       </div>
-      <div class="menu-grid">
-
-        <div class="menu-card reveal" style="transition-delay:0.05s">
-          <div class="card-top">
-            <img src="imagenes/2.PNG" alt="Bife de Chorizo">
-          </div>
-          <div class="card-body">
-            <h3>Bife de Chorizo</h3>
-            <div class="card-footer">
-              <div>
-                <div class="price">$420</div>
-                <div class="price-label">por plato</div>
-              </div>
-              <span class="card-tag">Signature</span>
-            </div>
-          </div>
-        </div>
-
-        <div class="menu-card reveal" style="transition-delay:0.15s">
-          <div class="card-top">
-            <img src="imagenes/1.PNG" alt="Salmón a la Mantequilla">
-          </div>
-          <div class="card-body">
-            <h3>Salmón a la Mantequilla</h3>
-            <div class="card-footer">
-              <div>
-                <div class="price">$380</div>
-                <div class="price-label">por plato</div>
-              </div>
-              <span class="card-tag">Del mar</span>
-            </div>
-          </div>
-        </div>
-
-        <div class="menu-card reveal" style="transition-delay:0.25s">
-          <div class="card-top">
-            <img src="imagenes/8.PNG" alt="Cordero al Vino Tinto">
-          </div>
-          <div class="card-body">
-            <h3>Cordero al Vino Tinto</h3>
-            <div class="card-footer">
-              <div>
-                <div class="price">$450</div>
-                <div class="price-label">por plato</div>
-              </div>
-              <span class="card-tag">Chef</span>
-            </div>
-          </div>
-        </div>
-
-      </div>
+      <ul class="platos-lista reveal">
+        <li>Bife de Chorizo</li>
+        <li>Salmón a la Mantequilla</li>
+        <li>Cordero al Vino Tinto</li>
+      </ul>
     </div>
   </section>
 
