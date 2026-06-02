@@ -10,6 +10,7 @@ import {
   MapPin,
   Paperclip,
   Pencil,
+  Search,
   ShieldCheck,
   Users,
   X
@@ -29,15 +30,6 @@ type Screen =
   | "history";
 
 type StatusTone = "green" | "blue" | "amber" | "red" | "slate";
-type Permissions = {
-  appointments: boolean;
-  studies: boolean;
-  medication: boolean;
-  reminders: boolean;
-  upload: boolean;
-  edit: boolean;
-  reshare: boolean;
-};
 
 const familyMembers = [
   {
@@ -111,7 +103,7 @@ const screenTitles: Record<Screen, string> = {
   dashboard: "Inicio",
   patient: "Familia",
   event: "Evento médico",
-  delegate: "Delegar",
+  delegate: "Acompañante",
   tasks: "Tareas",
   support: "Apoyo",
   history: "Historial"
@@ -128,15 +120,6 @@ function App() {
   const [screen, setScreen] = useState<Screen>("landing");
   const [saved, setSaved] = useState(false);
   const [accessSent, setAccessSent] = useState(false);
-  const [permissions, setPermissions] = useState({
-    appointments: true,
-    studies: true,
-    medication: false,
-    reminders: true,
-    upload: true,
-    edit: false,
-    reshare: false
-  });
 
   const go = (next: Screen) => {
     window.scrollTo({ top: 0, behavior: "smooth" });
@@ -152,9 +135,7 @@ function App() {
       {screen === "dashboard" && <Dashboard go={go} />}
       {screen === "patient" && <PatientProfile go={go} />}
       {screen === "event" && <MedicalEvent go={go} />}
-      {screen === "delegate" && (
-        <DelegateCare go={go} permissions={permissions} setPermissions={setPermissions} accessSent={accessSent} setAccessSent={setAccessSent} />
-      )}
+      {screen === "delegate" && <DelegateCare go={go} accessSent={accessSent} setAccessSent={setAccessSent} />}
       {screen === "tasks" && <TasksScreen go={go} />}
       {screen === "support" && <SupportScreen go={go} />}
       {screen === "history" && <HistoryScreen />}
@@ -364,7 +345,7 @@ function Dashboard({ go }: { go: (screen: Screen) => void }) {
       detail: "Vacuna pendiente",
       meta: "Sin turno asignado",
       status: "Falta coordinar turno",
-      onClick: () => go("tasks"),
+      onClick: undefined,
       hasNew: false,
       dateOrder: 2,
       updateOrder: 4
@@ -374,7 +355,7 @@ function Dashboard({ go }: { go: (screen: Screen) => void }) {
       detail: "Resultado de laboratorio cargado",
       meta: "PDF recibido hoy",
       status: "Revisar",
-      onClick: () => go("history"),
+      onClick: undefined,
       hasNew: true,
       dateOrder: 3,
       updateOrder: 2
@@ -384,12 +365,13 @@ function Dashboard({ go }: { go: (screen: Screen) => void }) {
       detail: "3 pendientes",
       meta: "Esta semana",
       status: "3 sin asignar",
-      onClick: () => go("delegate"),
+      onClick: undefined,
       hasNew: false,
       dateOrder: 4,
       updateOrder: 3
     }
   ].sort((a, b) => (eventOrder === "date" ? a.dateOrder - b.dateOrder : a.updateOrder - b.updateOrder));
+  const visibleEvents = upcomingEvents.filter((event) => event.title !== "Tareas por delegar");
 
   return (
     <div className="space-y-5">
@@ -415,10 +397,35 @@ function Dashboard({ go }: { go: (screen: Screen) => void }) {
         </div>
       </Card>
       <div className="grid gap-3">
-        {upcomingEvents.map((event) => (
+        {visibleEvents.map((event) => (
           <PatientCard key={event.title} {...event} />
         ))}
       </div>
+      <Card>
+        <div className="flex items-start justify-between gap-3">
+          <div>
+            <p className="text-sm font-bold text-primary">Coordinación familiar</p>
+            <h2 className="mt-1 text-xl font-black">Tareas por delegar</h2>
+            <p className="mt-1 text-sm text-muted">3 pendientes para asignar esta semana.</p>
+          </div>
+          <StatusBadge status="3 sin asignar" tone="amber" />
+        </div>
+        <div className="mt-4 grid grid-cols-3 gap-2 text-center">
+          <div className="rounded-2xl bg-slate-50 p-3">
+            <p className="text-xl font-black text-ink">3</p>
+            <p className="text-xs font-bold text-muted">Pendientes</p>
+          </div>
+          <div className="rounded-2xl bg-slate-50 p-3">
+            <p className="text-xl font-black text-ink">2</p>
+            <p className="text-xs font-bold text-muted">Familiares</p>
+          </div>
+          <div className="rounded-2xl bg-slate-50 p-3">
+            <p className="text-xl font-black text-ink">1</p>
+            <p className="text-xs font-bold text-muted">Urgente</p>
+          </div>
+        </div>
+        <SecondaryButton className="mt-4 w-full" onClick={() => go("tasks")}>Ver tareas</SecondaryButton>
+      </Card>
     </div>
   );
 }
@@ -492,9 +499,9 @@ function MedicalEvent({ go }: { go: (screen: Screen) => void }) {
         </div>
         <div className="mt-4 grid grid-cols-2 gap-2">
           <SecondaryButton>Editar turno</SecondaryButton>
-          <SecondaryButton>Vincular archivo</SecondaryButton>
-          <SecondaryButton>Agregar nota</SecondaryButton>
-          <SecondaryButton>Sumar acompañante</SecondaryButton>
+          <SecondaryButton>Añadir imagen</SecondaryButton>
+          <SecondaryButton onClick={() => document.getElementById("notas-consulta")?.scrollIntoView({ behavior: "smooth", block: "start" })}>Agregar nota</SecondaryButton>
+          <SecondaryButton onClick={() => go("delegate")}>Sumar acompañante</SecondaryButton>
         </div>
       </Card>
       <PackingList />
@@ -506,28 +513,297 @@ function MedicalEvent({ go }: { go: (screen: Screen) => void }) {
   );
 }
 
-function DelegateCare({ go, permissions, setPermissions, accessSent, setAccessSent }: { go: (screen: Screen) => void; permissions: Permissions; setPermissions: (p: Permissions) => void; accessSent: boolean; setAccessSent: (v: boolean) => void }) {
-  const labels: Record<keyof Permissions, string> = { appointments: "Ver turnos", studies: "Ver estudios", medication: "Ver medicación", reminders: "Recibir recordatorios", upload: "Subir documentos", edit: "Editar archivos", reshare: "Compartir con terceros" };
+function DelegateCare({ go, accessSent, setAccessSent }: { go: (screen: Screen) => void; accessSent: boolean; setAccessSent: (v: boolean) => void }) {
+  const companions = [
+    { id: "pablo", name: "Pablo Gómez", shortName: "Pablo", role: "Familiar colaborador" },
+    { id: "laura", name: "Laura", shortName: "Laura", role: "Cuidadora ocasional" }
+  ];
+  const notesForMessage = [
+    { id: "nota-1", text: "Falta de aire al caminar" },
+    { id: "nota-2", text: "Mareos leves por la mañana" },
+    { id: "nota-3", text: "Consultar ajuste de medicación" }
+  ];
+  const documentsForMessage = [
+    { id: "doc-1", title: "Receta_Losartan.jpg", meta: "Adjuntado 09:16" },
+    { id: "doc-2", title: "Orden_Control.jpg", meta: "Adjuntado 09:18" },
+    { id: "doc-3", title: "Credencial_Elena.jpg", meta: "Adjuntado 09:19" },
+    { id: "doc-4", title: "Laboratorio_Abril.pdf", meta: "Adjuntado 09:21" }
+  ];
+  const packingForMessage = [
+    { id: "llevar-1", text: "ECG 2025" },
+    { id: "llevar-2", text: "Laboratorio abril 2026" },
+    { id: "llevar-3", text: "Lista de medicación actual" },
+    { id: "llevar-4", text: "Orden médica" },
+    { id: "llevar-5", text: "Credencial de obra social" }
+  ];
+  const [selectedCompanionId, setSelectedCompanionId] = useState("pablo");
+  const [delegateStep, setDelegateStep] = useState<1 | 2 | 3>(1);
+  const [searchTerm, setSearchTerm] = useState("");
+  const [selectedNoteIds, setSelectedNoteIds] = useState(notesForMessage.map((note) => note.id));
+  const [selectedDocumentIds, setSelectedDocumentIds] = useState(documentsForMessage.map((document) => document.id));
+  const [selectedPackingIds, setSelectedPackingIds] = useState(packingForMessage.map((item) => item.id));
+  const selectedCompanion = companions.find((companion) => companion.id === selectedCompanionId) ?? companions[0];
+  const normalizedSearch = searchTerm.trim().toLowerCase();
+  const matchesSearch = (value: string) => !normalizedSearch || value.toLowerCase().includes(normalizedSearch);
+  const visibleNotes = notesForMessage.filter((note) => matchesSearch(note.text));
+  const visibleDocuments = documentsForMessage.filter((document) => matchesSearch(document.title));
+  const visiblePacking = packingForMessage.filter((item) => matchesSearch(item.text));
+  const selectedNotes = notesForMessage.filter((note) => selectedNoteIds.includes(note.id));
+  const selectedDocuments = documentsForMessage.filter((document) => selectedDocumentIds.includes(document.id));
+  const selectedPacking = packingForMessage.filter((item) => selectedPackingIds.includes(item.id));
+
+  const selectCompanion = (id: string) => {
+    setSelectedCompanionId(id);
+    setAccessSent(false);
+  };
+  const toggleSelected = (id: string, selectedIds: string[], setSelectedIds: (ids: string[]) => void) => {
+    setSelectedIds(selectedIds.includes(id) ? selectedIds.filter((selectedId) => selectedId !== id) : [...selectedIds, id]);
+    setAccessSent(false);
+  };
+  const moveToStep = (step: 1 | 2 | 3) => {
+    setDelegateStep(step);
+    window.scrollTo({ top: 0, behavior: "smooth" });
+  };
+
   return (
     <div className="space-y-4">
-      {accessSent && <div className="rounded-2xl bg-emerald-50 p-4 font-bold text-emerald-700">Acceso enviado a Pablo</div>}
-      <SectionTitle title="Delegar cuidado" subtitle="Compartí solo lo necesario, por el tiempo necesario." />
-      <Card><FieldRow label="Compartir con" value="Pablo" /></Card>
-      <Card className="space-y-3">
-        {(Object.entries(labels) as Array<[keyof Permissions, string]>).map(([key, label]) => <PermissionToggle key={key} label={label} checked={permissions[key]} onChange={() => setPermissions({ ...permissions, [key]: !permissions[key] })} />)}
-      </Card>
-      <Card>
-        <p className="font-bold">Configurar acceso</p>
-        <div className="mt-3 grid gap-2">{["Solo para este evento médico", "Temporal", "Permanente"].map((x, i) => <Chip active={i === 1} key={x}>{x}</Chip>)}</div>
-        <FieldRow label="Fecha de fin" value="30 mayo 2026" />
-      </Card>
-      <Card>
-        <p className="font-black text-ink">Resumen del acceso</p>
-        <p className="mt-1 text-sm leading-6 text-muted">Pablo podrá ver el turno de cardiología, acceder a los estudios vinculados y subir documentos. No podrá editar ni compartir información con terceros.</p>
-      </Card>
-      <PrimaryButton className="w-full" onClick={() => setAccessSent(true)}>Enviar acceso</PrimaryButton>
-      <SecondaryButton className="w-full" onClick={() => go("tasks")}>Ver tareas compartidas</SecondaryButton>
+      {accessSent && <div className="rounded-2xl bg-emerald-50 p-4 font-bold text-emerald-700">Mensaje listo para enviar a {selectedCompanion.shortName}</div>}
+      <SectionTitle title="Sumar acompañante" subtitle="Armá el mensaje en tres pasos." />
+      <StepProgress current={delegateStep} />
+
+      {delegateStep === 1 && (
+        <>
+          <Card>
+            <StepHeader number="1" title="Elegir acompañante" text="Quién va a recibir la información del turno." />
+            <div className="mt-4 grid gap-2">
+              {companions.map((companion) => {
+                const isSelected = companion.id === selectedCompanionId;
+                return (
+                  <button
+                    key={companion.id}
+                    className={`flex items-center justify-between rounded-2xl border p-3 text-left transition ${isSelected ? "border-primary bg-blue-50" : "border-slate-200 bg-white"}`}
+                    onClick={() => selectCompanion(companion.id)}
+                  >
+                    <div className="flex items-center gap-3">
+                      <PersonAvatar name={companion.shortName} />
+                      <div>
+                        <p className="font-black text-ink">{companion.name}</p>
+                        <p className="text-sm text-muted">{companion.role}</p>
+                      </div>
+                    </div>
+                    {isSelected && <Check className="text-primary" size={20} />}
+                  </button>
+                );
+              })}
+            </div>
+          </Card>
+          <PrimaryButton className="w-full" onClick={() => moveToStep(2)}>Continuar</PrimaryButton>
+          <SecondaryButton className="w-full" onClick={() => go("event")}>Volver al evento</SecondaryButton>
+        </>
+      )}
+
+      {delegateStep === 2 && (
+        <>
+          <Card>
+            <StepHeader number="2" title="Marcar qué se comparte" text="Notas, documentos y cosas para llevar que van a formar el mensaje." />
+            <label className="mt-4 flex items-center gap-2 rounded-2xl bg-slate-50 px-3 py-2 text-sm text-muted">
+              <Search size={18} />
+              <input
+                className="w-full bg-transparent font-semibold text-ink outline-none placeholder:text-muted"
+                placeholder="Buscar notas o documentos"
+                value={searchTerm}
+                onChange={(event) => setSearchTerm(event.target.value)}
+              />
+            </label>
+          </Card>
+
+          <SelectionGroup
+            title="Notas para la consulta"
+            subtitle="Se agregan al cuerpo del mensaje"
+            items={visibleNotes.map((note) => ({ id: note.id, title: note.text }))}
+            selectedIds={selectedNoteIds}
+            onToggle={(id) => toggleSelected(id, selectedNoteIds, setSelectedNoteIds)}
+          />
+
+          <SelectionGroup
+            title="Documentos adjuntos"
+            subtitle="Ordenados por momento de adjuntado"
+            items={visibleDocuments.map((document) => ({ id: document.id, title: document.title, meta: document.meta }))}
+            selectedIds={selectedDocumentIds}
+            onToggle={(id) => toggleSelected(id, selectedDocumentIds, setSelectedDocumentIds)}
+            icon="file"
+          />
+
+          <SelectionGroup
+            title="Cosas para llevar"
+            subtitle="Se envían como checklist simple"
+            items={visiblePacking.map((item) => ({ id: item.id, title: item.text }))}
+            selectedIds={selectedPackingIds}
+            onToggle={(id) => toggleSelected(id, selectedPackingIds, setSelectedPackingIds)}
+          />
+
+          <PrimaryButton className="w-full" onClick={() => moveToStep(3)}>Ver mensaje</PrimaryButton>
+          <SecondaryButton className="w-full" onClick={() => moveToStep(1)}>Volver</SecondaryButton>
+        </>
+      )}
+
+      {delegateStep === 3 && (
+        <>
+          <StepHeader number="3" title="Mensaje de WhatsApp" text="Vista previa generada con los checks seleccionados." />
+          <MockPhoneFrame scroll>
+            <div className="bg-care px-4 py-3 text-white">
+              <p className="text-xs font-bold">Mensaje saliente</p>
+              <div className="mt-2 flex items-center gap-3">
+                <PersonAvatar name={selectedCompanion.shortName} />
+                <div>
+                  <p className="font-black">{selectedCompanion.name}</p>
+                  <p className="text-xs text-emerald-50">Acompañante del turno</p>
+                </div>
+              </div>
+            </div>
+            <div className="space-y-3 bg-[#e9f3ec] p-4">
+              <ChatBubble mine>
+                <p className="font-bold">Hola {selectedCompanion.shortName}, Marina te comparte el control de cardiología de Mamá Elena.</p>
+                <div className="mt-3 space-y-1 text-sm">
+                  <p><b>1. Datos de la cita</b></p>
+                  <p>✓ 30/05 · 10:30</p>
+                  <p>✓ Cardiología · Dr. Ruiz</p>
+                  <p>✓ Av. Santa Fe 2450</p>
+                  <p>✓ Ubicación guardada para abrir en Google Maps</p>
+                </div>
+              </ChatBubble>
+              {selectedNotes.length > 0 && (
+                <ChatBubble mine>
+                  <p className="font-bold">2. Notas para la consulta</p>
+                  <div className="mt-2 space-y-1 text-sm leading-6">
+                    {selectedNotes.map((note) => <p key={note.id}>✓ {note.text}</p>)}
+                  </div>
+                </ChatBubble>
+              )}
+              {selectedPacking.length > 0 && (
+                <ChatBubble mine>
+                  <p className="font-bold">3. Para llevar</p>
+                  <div className="mt-2 space-y-1 text-sm leading-6">
+                    {selectedPacking.map((item) => <p key={item.id}>✓ {item.text}</p>)}
+                  </div>
+                </ChatBubble>
+              )}
+              {selectedDocuments.length > 0 && (
+                <div className="grid gap-2">
+                  {selectedDocuments.map((document) => (
+                    <div key={document.id} className="ml-auto flex w-[86%] items-center gap-3 rounded-2xl rounded-br-sm bg-[#d9f9c9] p-3 text-sm text-ink shadow-sm">
+                      <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-white text-primary">
+                        <FileText size={18} />
+                      </span>
+                      <div className="min-w-0">
+                        <p className="truncate font-black">{document.title}</p>
+                        <p className="text-xs text-muted">Documento adjunto</p>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
+          </MockPhoneFrame>
+
+          <Card>
+            <p className="font-black text-ink">Qué se comparte</p>
+            <p className="mt-1 text-sm leading-6 text-muted">Solo los datos de esta cita y los documentos marcados para llevar. No se comparte el historial completo de Mamá Elena.</p>
+          </Card>
+          <PrimaryButton className="w-full" onClick={() => setAccessSent(true)}>Enviar por WhatsApp</PrimaryButton>
+          <SecondaryButton className="w-full" onClick={() => moveToStep(2)}>Editar selección</SecondaryButton>
+        </>
+      )}
     </div>
+  );
+}
+
+function StepProgress({ current }: { current: 1 | 2 | 3 }) {
+  return (
+    <div className="grid grid-cols-3 gap-2">
+      {[
+        { number: 1, label: "Acompañante" },
+        { number: 2, label: "Contenido" },
+        { number: 3, label: "Mensaje" }
+      ].map((step) => {
+        const isActive = step.number === current;
+        const isDone = step.number < current;
+        return (
+          <div key={step.number} className={`rounded-2xl border p-3 text-center ${isActive ? "border-primary bg-blue-50" : "border-slate-200 bg-white"}`}>
+            <span className={`mx-auto flex h-7 w-7 items-center justify-center rounded-full text-xs font-black ${isDone ? "bg-care text-white" : isActive ? "bg-primary text-white" : "bg-slate-100 text-muted"}`}>
+              {isDone ? <Check size={14} /> : step.number}
+            </span>
+            <p className={`mt-2 text-xs font-black ${isActive ? "text-primary" : "text-muted"}`}>{step.label}</p>
+          </div>
+        );
+      })}
+    </div>
+  );
+}
+
+function StepHeader({ number, title, text }: { number: string; title: string; text: string }) {
+  return (
+    <div className="flex items-start gap-3">
+      <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-primary text-sm font-black text-white">{number}</span>
+      <div>
+        <p className="font-black text-ink">{title}</p>
+        <p className="mt-1 text-sm leading-5 text-muted">{text}</p>
+      </div>
+    </div>
+  );
+}
+
+function SelectionGroup({
+  title,
+  subtitle,
+  items,
+  selectedIds,
+  onToggle,
+  icon
+}: {
+  title: string;
+  subtitle: string;
+  items: Array<{ id: string; title: string; meta?: string }>;
+  selectedIds: string[];
+  onToggle: (id: string) => void;
+  icon?: "file";
+}) {
+  return (
+    <Card>
+      <div className="flex items-start justify-between gap-3">
+        <div>
+          <p className="font-black text-ink">{title}</p>
+          <p className="mt-1 text-sm text-muted">{subtitle}</p>
+        </div>
+        <StatusBadge status={`${items.filter((item) => selectedIds.includes(item.id)).length} seleccionados`} tone="blue" />
+      </div>
+      <div className="mt-4 grid gap-2">
+        {items.length === 0 && <p className="rounded-2xl bg-slate-50 p-3 text-sm font-semibold text-muted">Sin resultados para esta búsqueda.</p>}
+        {items.map((item) => {
+          const isSelected = selectedIds.includes(item.id);
+          return (
+            <button
+              key={item.id}
+              className={`flex items-center justify-between gap-3 rounded-2xl border p-3 text-left transition ${isSelected ? "border-primary bg-blue-50" : "border-slate-200 bg-white"}`}
+              onClick={() => onToggle(item.id)}
+            >
+              <div className="flex min-w-0 items-center gap-3">
+                <span className={`flex h-9 w-9 shrink-0 items-center justify-center rounded-xl ${isSelected ? "bg-white text-primary" : "bg-slate-50 text-muted"}`}>
+                  {icon === "file" ? <FileText size={17} /> : <ClipboardList size={17} />}
+                </span>
+                <div className="min-w-0">
+                  <p className="truncate font-black text-ink">{item.title}</p>
+                  {item.meta && <p className="text-xs font-semibold text-muted">{item.meta}</p>}
+                </div>
+              </div>
+              <span className={`flex h-6 w-6 shrink-0 items-center justify-center rounded-full border ${isSelected ? "border-primary bg-primary text-white" : "border-slate-300 bg-white"}`}>
+                {isSelected && <Check size={14} />}
+              </span>
+            </button>
+          );
+        })}
+      </div>
+    </Card>
   );
 }
 
@@ -661,10 +937,9 @@ function PrepFieldRow({ label, value, editing }: { label: string; value: string;
   );
 }
 
-function PatientCard({ title, detail, meta, status, onClick, hasNew = false }: { title: string; detail: string; meta: string; status: string; onClick: () => void; hasNew?: boolean }) {
-  return (
-    <button onClick={onClick} className="w-full text-left">
-      <Card className="relative flex items-center justify-between gap-3">
+function PatientCard({ title, detail, meta, status, onClick, hasNew = false }: { title: string; detail: string; meta: string; status: string; onClick?: () => void; hasNew?: boolean }) {
+  const content = (
+    <Card className="relative flex items-center justify-between gap-3">
         {hasNew && <span className="absolute right-3 top-3 h-2.5 w-2.5 rounded-full bg-attention ring-4 ring-red-50" aria-label="Movimiento nuevo" />}
         <div>
           <div className="flex items-center gap-2">
@@ -676,9 +951,16 @@ function PatientCard({ title, detail, meta, status, onClick, hasNew = false }: {
         </div>
         <div className="text-right">
           <StatusBadge status={status} tone={toneForStatus(status)} />
-          <ChevronRight className="ml-auto mt-4 text-primary" />
+          {onClick && <ChevronRight className="ml-auto mt-4 text-primary" />}
         </div>
       </Card>
+  );
+
+  if (!onClick) return <div>{content}</div>;
+
+  return (
+    <button onClick={onClick} className="w-full text-left">
+      {content}
     </button>
   );
 }
@@ -704,6 +986,7 @@ function ConsultationNotes() {
   ];
 
   return (
+    <div id="notas-consulta" className="scroll-mt-24">
     <Card>
       <div className="flex items-start justify-between gap-3">
         <div>
@@ -740,6 +1023,7 @@ function ConsultationNotes() {
         <SecondaryButton className="mt-3 w-full">Agregar a la consulta</SecondaryButton>
       </div>
     </Card>
+    </div>
   );
 }
 
@@ -805,8 +1089,8 @@ function ChatBubble({ children, mine = false }: { children: React.ReactNode; min
   return <div className={`max-w-[84%] rounded-2xl px-3 py-2 text-sm shadow-sm ${mine ? "ml-auto rounded-br-sm bg-[#dcf8c6]" : "rounded-bl-sm bg-white"}`}>{children}</div>;
 }
 
-function MockPhoneFrame({ children }: { children: React.ReactNode }) {
-  return <div className="overflow-hidden rounded-[2rem] border-4 border-slate-800 bg-white shadow-soft">{children}</div>;
+function MockPhoneFrame({ children, scroll = false }: { children: React.ReactNode; scroll?: boolean }) {
+  return <div className={`${scroll ? "scrollbar-none h-[min(68vh,560px)] min-h-[430px] overflow-y-auto" : "overflow-hidden"} rounded-[2rem] border-4 border-slate-800 bg-white shadow-soft`}>{children}</div>;
 }
 
 function Checklist({ title, subtitle, items }: { title: string; subtitle?: string; items: string[] }) {
