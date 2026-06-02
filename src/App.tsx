@@ -8,10 +8,15 @@ import {
   Home,
   LockKeyhole,
   MapPin,
+  Mic,
   Paperclip,
   Pencil,
+  Play,
+  Plus,
   Search,
   ShieldCheck,
+  Square,
+  Trash2,
   Users,
   X
 } from "lucide-react";
@@ -70,12 +75,8 @@ const familyMembers = [
   { id: "laura", name: "Laura", role: "Cuidadora ocasional" }
 ];
 
-const tasks = [
-  { id: "task-1", owner: "Pablo", patient: "Tomás", title: "Subir estudio de Tomás", due: "Hoy", status: "Pendiente" },
-  { id: "task-2", owner: "Marina", patient: "Mamá Elena", title: "Llevar receta a farmacia", due: "18:00", status: "En curso" },
-  { id: "task-3", owner: "Elena", patient: "Mamá Elena", title: "Confirmar pastillas", due: "20:00", status: "Pendiente" },
-  { id: "task-4", owner: "Laura", patient: "Mamá Elena", title: "Acompañar a control cardiológico", due: "Mañana 10:00", status: "Confirmado" },
-  { id: "task-5", owner: "Marina", patient: "Mamá Elena", title: "Autorizar estudio en obra social", due: "Esta semana", status: "Pendiente" }
+const reminders = [
+  { id: "reminder-1", title: "Losartán 50 mg", detail: "1 comprimido por día", time: "20:00", status: "Activo" }
 ];
 
 const medicalFiles = [
@@ -104,15 +105,15 @@ const screenTitles: Record<Screen, string> = {
   patient: "Familia",
   event: "Evento médico",
   delegate: "Acompañante",
-  tasks: "Tareas",
+  tasks: "Recordatorios",
   support: "Apoyo",
   history: "Historial"
 };
 
 function toneForStatus(status: string): StatusTone {
-  if (["Clasificado", "Confirmado", "Hecho"].includes(status)) return "green";
-  if (["En curso", "Revisar"].includes(status)) return "blue";
-  if (["Pendiente", "Pendiente de revisar", "Requiere confirmación", "Sin clasificar"].some((word) => status.includes(word))) return "amber";
+  if (["Clasificado", "Confirmado", "Hecho", "Activo"].includes(status)) return "green";
+  if (["En curso", "Revisar", "Programado"].includes(status)) return "blue";
+  if (["Pendiente", "Pendiente de revisar", "Requiere confirmación", "Sin clasificar", "A confirmar"].some((word) => status.includes(word))) return "amber";
   return "slate";
 }
 
@@ -120,6 +121,7 @@ function App() {
   const [screen, setScreen] = useState<Screen>("landing");
   const [saved, setSaved] = useState(false);
   const [accessSent, setAccessSent] = useState(false);
+  const [companionAssignment, setCompanionAssignment] = useState<string | null>(null);
 
   const go = (next: Screen) => {
     window.scrollTo({ top: 0, behavior: "smooth" });
@@ -132,10 +134,10 @@ function App() {
       {screen === "landing" && <Landing go={go} />}
       {screen === "chat" && <ChatSimulation go={go} />}
       {screen === "classification" && <Classification go={go} saved={saved} setSaved={setSaved} />}
-      {screen === "dashboard" && <Dashboard go={go} />}
+      {screen === "dashboard" && <Dashboard go={go} companionAssignment={companionAssignment} />}
       {screen === "patient" && <PatientProfile go={go} />}
       {screen === "event" && <MedicalEvent go={go} />}
-      {screen === "delegate" && <DelegateCare go={go} accessSent={accessSent} setAccessSent={setAccessSent} />}
+      {screen === "delegate" && <DelegateCare go={go} accessSent={accessSent} setAccessSent={setAccessSent} onCompanionAssigned={setCompanionAssignment} />}
       {screen === "tasks" && <TasksScreen go={go} />}
       {screen === "support" && <SupportScreen go={go} />}
       {screen === "history" && <HistoryScreen />}
@@ -179,7 +181,7 @@ function BottomNav({ active, go }: { active: Screen; go: (screen: Screen) => voi
   const items = [
     { label: "Inicio", icon: Home, screen: "dashboard" as Screen },
     { label: "Familia", icon: Users, screen: "patient" as Screen },
-    { label: "Tareas", icon: ClipboardList, screen: "tasks" as Screen },
+    { label: "Recordatorios", icon: Bell, screen: "tasks" as Screen },
     { label: "Historial", icon: ShieldCheck, screen: "history" as Screen }
   ];
   return (
@@ -202,15 +204,15 @@ function BottomNav({ active, go }: { active: Screen; go: (screen: Screen) => voi
 
 function Landing({ go }: { go: (screen: Screen) => void }) {
   return (
-    <section className="flex min-h-screen flex-col justify-between py-4">
+    <section className="-mx-4 flex min-h-screen flex-col justify-between bg-emerald-50 px-4 py-4">
       <div>
-        <div className="mb-7 rounded-[2rem] bg-primary p-6 text-white shadow-soft">
+        <div className="mb-7 rounded-[2rem] bg-care p-6 text-white shadow-soft">
           <div className="mb-10 flex items-center justify-between">
             <div className="rounded-2xl bg-white/15 p-3"><HeartHandshake /></div>
             <span className="rounded-full bg-white/15 px-3 py-1 text-xs font-semibold">Cuidado familiar</span>
           </div>
           <h1 className="text-4xl font-black leading-tight">Salud en equipo</h1>
-          <p className="mt-3 text-lg font-semibold text-blue-50">Del chat desordenado al cuidado familiar organizado.</p>
+          <p className="mt-3 text-lg font-semibold text-emerald-50">Del chat desordenado al cuidado familiar organizado.</p>
         </div>
         <p className="text-base leading-7 text-muted">
           Guardá recetas, estudios, turnos y mensajes reenviados desde WhatsApp en una bandeja ordenada por persona, evento y tipo de documento.
@@ -222,7 +224,7 @@ function Landing({ go }: { go: (screen: Screen) => void }) {
             "Permite delegar sin perder control",
             "Acompaña sin vigilar"
           ].map((text) => (
-            <Card key={text} className="flex items-center gap-3">
+            <Card key={text} className="flex items-center gap-3 border-emerald-100">
               <Check className="text-care" size={20} />
               <span className="font-semibold">{text}</span>
             </Card>
@@ -230,10 +232,14 @@ function Landing({ go }: { go: (screen: Screen) => void }) {
         </div>
       </div>
       <div className="mt-8">
-        <InfoCallout title="Privacidad y control">
-          La persona gestora decide qué se comparte, con quién, por cuánto tiempo y con qué permisos. El sistema evita mostrar actividad innecesaria y prioriza estados de cuidado antes que vigilancia.
-        </InfoCallout>
-        <PrimaryButton className="mt-4 w-full" onClick={() => go("chat")}>Empezar</PrimaryButton>
+        <Card className="border-emerald-100">
+          <p className="text-sm font-black text-ink">Proyecto creado para Interacciones 1</p>
+          <p className="mt-1 text-sm leading-6 text-muted">Fundamentos y práctica de diseño centrado en personas.</p>
+          <p className="mt-2 text-sm font-semibold text-muted">Alumnos: Alfonsina y Jorge Bozzarello.</p>
+        </Card>
+        <button onClick={() => go("chat")} className="mt-4 flex min-h-12 w-full items-center justify-center rounded-2xl bg-care px-4 py-3 font-black text-white shadow-sm transition active:scale-[0.98]">
+          Empezar
+        </button>
         <p className="mt-3 text-center text-xs text-muted">Datos de ejemplo. No usa información real ni conexión a WhatsApp.</p>
       </div>
     </section>
@@ -248,7 +254,7 @@ function ChatSimulation({ go }: { go: (screen: Screen) => void }) {
         <span className="rounded-full bg-slate-100 px-3 py-1 text-xs font-bold text-muted">Captura externa</span>
       </div>
       <div className="space-y-2">
-        <h1 className="text-2xl font-black text-ink">Así entra la información</h1>
+        <h1 className="text-2xl font-black text-ink">Inicio del flujo</h1>
         <p className="text-sm leading-6 text-muted">
           Marina reenvía una receta al contacto Salud en equipo. El sistema lee la imagen, pregunta lo mínimo necesario y deja listo el guardado con recordatorio.
         </p>
@@ -327,7 +333,7 @@ function Classification({ go, saved, setSaved }: { go: (screen: Screen) => void;
   );
 }
 
-function Dashboard({ go }: { go: (screen: Screen) => void }) {
+function Dashboard({ go, companionAssignment }: { go: (screen: Screen) => void; companionAssignment: string | null }) {
   const [eventOrder, setEventOrder] = useState<"date" | "updates">("date");
   const upcomingEvents = [
     {
@@ -360,18 +366,7 @@ function Dashboard({ go }: { go: (screen: Screen) => void }) {
       dateOrder: 3,
       updateOrder: 2
     },
-    {
-      title: "Tareas por delegar",
-      detail: "3 pendientes",
-      meta: "Esta semana",
-      status: "3 sin asignar",
-      onClick: undefined,
-      hasNew: false,
-      dateOrder: 4,
-      updateOrder: 3
-    }
   ].sort((a, b) => (eventOrder === "date" ? a.dateOrder - b.dateOrder : a.updateOrder - b.updateOrder));
-  const visibleEvents = upcomingEvents.filter((event) => event.title !== "Tareas por delegar");
 
   return (
     <div className="space-y-5">
@@ -397,7 +392,7 @@ function Dashboard({ go }: { go: (screen: Screen) => void }) {
         </div>
       </Card>
       <div className="grid gap-3">
-        {visibleEvents.map((event) => (
+        {upcomingEvents.map((event) => (
           <PatientCard key={event.title} {...event} />
         ))}
       </div>
@@ -405,48 +400,314 @@ function Dashboard({ go }: { go: (screen: Screen) => void }) {
         <div className="flex items-start justify-between gap-3">
           <div>
             <p className="text-sm font-bold text-primary">Coordinación familiar</p>
-            <h2 className="mt-1 text-xl font-black">Tareas por delegar</h2>
-            <p className="mt-1 text-sm text-muted">3 pendientes para asignar esta semana.</p>
+            <h2 className="mt-1 text-xl font-black">{companionAssignment ? "Acompañante asignado" : "Acompañante por asignar"}</h2>
+            <p className="mt-1 text-sm text-muted">
+              {companionAssignment ? `Asignada a acompañante ${companionAssignment} para el control de Mamá Elena.` : "Definí quién acompaña el próximo control de Mamá Elena."}
+            </p>
           </div>
-          <StatusBadge status="3 sin asignar" tone="amber" />
+          <StatusBadge status={companionAssignment ? "Asignada" : "Sin asignar"} tone={companionAssignment ? "green" : "amber"} />
         </div>
         <div className="mt-4 grid grid-cols-3 gap-2 text-center">
           <div className="rounded-2xl bg-slate-50 p-3">
-            <p className="text-xl font-black text-ink">3</p>
-            <p className="text-xs font-bold text-muted">Pendientes</p>
+            <p className="text-xl font-black text-ink">{companionAssignment ? companionAssignment : "1"}</p>
+            <p className="text-xs font-bold text-muted">{companionAssignment ? "Asignado" : "Evento"}</p>
           </div>
           <div className="rounded-2xl bg-slate-50 p-3">
-            <p className="text-xl font-black text-ink">2</p>
-            <p className="text-xs font-bold text-muted">Familiares</p>
+            <p className="text-xl font-black text-ink">{companionAssignment ? "WhatsApp" : "2"}</p>
+            <p className="text-xs font-bold text-muted">{companionAssignment ? "Canal" : "Familiares"}</p>
           </div>
           <div className="rounded-2xl bg-slate-50 p-3">
-            <p className="text-xl font-black text-ink">1</p>
-            <p className="text-xs font-bold text-muted">Urgente</p>
+            <p className="text-xl font-black text-ink">{companionAssignment ? "Mañana" : "1"}</p>
+            <p className="text-xs font-bold text-muted">{companionAssignment ? "Turno" : "Urgente"}</p>
           </div>
         </div>
-        <SecondaryButton className="mt-4 w-full" onClick={() => go("tasks")}>Ver tareas</SecondaryButton>
+        <SecondaryButton className="mt-4 w-full" onClick={() => go("tasks")}>Ver recordatorios</SecondaryButton>
       </Card>
     </div>
   );
 }
 
 function PatientProfile({ go }: { go: (screen: Screen) => void }) {
-  const elena = familyMembers[1];
+  type ManagedPatient = {
+    id: string;
+    name: string;
+    age: string;
+    condition: string;
+    companions: string[];
+    history: Array<{ title: string; detail: string }>;
+  };
+  type ManagedCompanion = { id: string; name: string; role: string; access: string; patients: string[] };
+
+  const [tab, setTab] = useState<"patients" | "companions">("patients");
+  const [patients, setPatients] = useState<ManagedPatient[]>([
+    {
+      id: "elena",
+      name: "Mamá Elena",
+      age: "72",
+      condition: "Hipertensión",
+      companions: ["Pablo", "Laura"],
+      history: [
+        { title: "Receta Losartán 50 mg", detail: "Receta · WhatsApp · 20/05/2026" },
+        { title: "ECG 2025", detail: "Estudio · PDF · 10/12/2025" },
+        { title: "Laboratorio abril 2026", detail: "Laboratorio · PDF · 12/04/2026" },
+        { title: "Orden control cardiológico", detail: "Orden médica · Foto · 18/05/2026" }
+      ]
+    },
+    {
+      id: "tomas",
+      name: "Tomás",
+      age: "9",
+      condition: "Vacunas y controles pediátricos",
+      companions: ["Marina", "Pablo"],
+      history: [
+        { title: "Carnet de vacunas", detail: "Credencial · Foto · 15/05/2026" },
+        { title: "Audio: turno pediatra", detail: "Turno · WhatsApp · 21/05/2026" }
+      ]
+    },
+    {
+      id: "lucia",
+      name: "Lucía",
+      age: "15",
+      condition: "Controles clínicos",
+      companions: ["Marina"],
+      history: [
+        { title: "Resultado laboratorio.pdf", detail: "Laboratorio · PDF · 18/05/2026" }
+      ]
+    }
+  ]);
+  const [companions, setCompanions] = useState<ManagedCompanion[]>([
+    { id: "pablo", name: "Pablo Gómez", role: "Familiar colaborador", access: "Turnos y documentos del evento", patients: ["Mamá Elena", "Tomás"] },
+    { id: "laura", name: "Laura", role: "Cuidadora ocasional", access: "Solo eventos asignados", patients: ["Mamá Elena"] }
+  ]);
+  const [selectedPatientId, setSelectedPatientId] = useState("elena");
+  const [patientFormOpen, setPatientFormOpen] = useState<"new" | "edit" | null>(null);
+  const [companionFormOpen, setCompanionFormOpen] = useState<"new" | "edit" | null>(null);
+  const [editingCompanionId, setEditingCompanionId] = useState<string | null>(null);
+  const [patientDraft, setPatientDraft] = useState({ name: "", age: "", condition: "" });
+  const [companionDraft, setCompanionDraft] = useState({ name: "", role: "", access: "", patients: "" });
+  const selectedPatient = patients.find((patient) => patient.id === selectedPatientId) ?? patients[0];
+
+  const openPatientForm = (mode: "new" | "edit", patient = selectedPatient) => {
+    setPatientFormOpen(mode);
+    setPatientDraft(mode === "edit" && patient ? {
+      name: patient.name,
+      age: patient.age,
+      condition: patient.condition
+    } : {
+      name: "",
+      age: "",
+      condition: ""
+    });
+  };
+  const savePatient = () => {
+    if (!patientDraft.name.trim()) return;
+    if (patientFormOpen === "edit" && selectedPatient) {
+      setPatients((current) => current.map((patient) => patient.id === selectedPatient.id ? { ...patient, ...patientDraft } : patient));
+    } else {
+      const newPatient = {
+        id: `patient-${Date.now()}`,
+        ...patientDraft,
+        companions: [],
+        history: [{ title: "Historia médica iniciada", detail: "Alta manual · Hoy" }]
+      };
+      setPatients((current) => [...current, newPatient]);
+      setSelectedPatientId(newPatient.id);
+    }
+    setPatientFormOpen(null);
+  };
+  const applySuggestedPatient = () => {
+    setPatientDraft((current) => ({
+      name: current.name || "Roberto Rivas",
+      age: current.age || "68",
+      condition: current.condition || "Control clínico y presión arterial"
+    }));
+  };
+  const deletePatient = (patientId: string) => {
+    setPatients((current) => {
+      const next = current.filter((patient) => patient.id !== patientId);
+      if (selectedPatientId === patientId && next[0]) setSelectedPatientId(next[0].id);
+      return next;
+    });
+  };
+  const openCompanionForm = (mode: "new" | "edit", companion = companions[0]) => {
+    setCompanionFormOpen(mode);
+    setEditingCompanionId(mode === "edit" && companion ? companion.id : null);
+    setCompanionDraft(mode === "edit" && companion ? {
+      name: companion.name,
+      role: companion.role,
+      access: companion.access,
+      patients: companion.patients.join(", ")
+    } : {
+      name: "",
+      role: "",
+      access: "",
+      patients: ""
+    });
+  };
+  const saveCompanion = () => {
+    if (!companionDraft.name.trim()) return;
+    const companionData = {
+      name: companionDraft.name,
+      role: companionDraft.role,
+      access: companionDraft.access,
+      patients: companionDraft.patients.split(",").map((patient) => patient.trim()).filter(Boolean)
+    };
+    if (companionFormOpen === "edit") {
+      setCompanions((current) => current.map((companion) => companion.id === editingCompanionId ? { ...companion, ...companionData } : companion));
+    } else {
+      setCompanions((current) => [...current, { id: `companion-${Date.now()}`, ...companionData }]);
+    }
+    setCompanionFormOpen(null);
+    setEditingCompanionId(null);
+  };
+  const applySuggestedCompanionRole = () => {
+    setCompanionDraft((current) => ({
+      ...current,
+      role: current.role || "Acompañante de consulta",
+      access: current.access || "Puede ver datos de la cita, documentos adjuntos y checklist para llevar",
+      patients: current.patients || "Mamá Elena"
+    }));
+  };
+
   return (
     <div className="space-y-4">
-      <Card className="bg-primary text-white">
-        <div className="flex items-center gap-4"><PersonAvatar name="ME" large /><div><h1 className="text-2xl font-black">{elena.name}</h1><p className="text-blue-50">72 años · Persona acompañada</p></div></div>
-        <div className="mt-4 grid gap-2 text-sm text-blue-50">
-          <p>Dato de cuidado relevante: Hipertensión</p>
-          <p>Próximo turno: Cardiología, Dr. Ruiz, 30/05, 10:30</p>
-          <p>Rutina registrada: Losartán 50 mg</p>
-        </div>
-      </Card>
-      <Card><FieldRow label="Responsable principal" value="Marina" /><FieldRow label="Acceso compartido con" value="Pablo, Laura" /></Card>
-      <div className="grid grid-cols-2 gap-3">{["Archivo familiar", "Recetas", "Estudios", "Turnos", "Rutinas", "Trámites", "Compartido con", "Actividad reciente"].map((s) => <Card key={s} className="min-h-24"><p className="font-bold">{s}</p><ChevronRight className="mt-3 text-primary" size={18} /></Card>)}</div>
-      <SectionTitle title="Archivos" subtitle="Ordenados por tipo y fecha" />
-      {medicalFiles.map((file) => <Card key={file.id} className="flex items-center justify-between"><div><p className="font-bold">{file.title}</p><p className="text-sm text-muted">{file.type} · {file.source} · {file.date}</p></div><FileText className="text-primary" /></Card>)}
-      <div className="grid gap-3"><PrimaryButton>Agregar documento</PrimaryButton><SecondaryButton onClick={() => go("event")}>Preparar consulta</SecondaryButton><SecondaryButton onClick={() => go("delegate")}>Delegar acceso</SecondaryButton></div>
+      <SectionTitle title="Familia" subtitle="Gestioná pacientes, historial médico y acompañantes." />
+      <div className="grid grid-cols-2 gap-2 rounded-2xl bg-slate-100 p-1">
+        <button onClick={() => setTab("patients")} className={`rounded-xl px-3 py-2 text-sm font-black ${tab === "patients" ? "bg-white text-primary shadow-sm" : "text-muted"}`}>Pacientes</button>
+        <button onClick={() => setTab("companions")} className={`rounded-xl px-3 py-2 text-sm font-black ${tab === "companions" ? "bg-white text-primary shadow-sm" : "text-muted"}`}>Acompañantes</button>
+      </div>
+
+      {tab === "patients" && (
+        <>
+          <Card>
+            <div className="flex items-center justify-between gap-3">
+              <div>
+                <p className="font-black">Pacientes</p>
+                <p className="text-sm text-muted">Alta, baja y modificación.</p>
+              </div>
+              <button onClick={() => openPatientForm("new")} className="flex h-11 w-11 items-center justify-center rounded-full bg-primary text-white" aria-label="Dar de alta paciente">
+                <Plus size={20} />
+              </button>
+            </div>
+            <div className="mt-4 grid gap-2">
+              {patients.map((patient) => {
+                const isSelected = patient.id === selectedPatient.id;
+                return (
+                  <button key={patient.id} onClick={() => setSelectedPatientId(patient.id)} className={`flex items-center justify-between rounded-2xl border p-3 text-left ${isSelected ? "border-primary bg-blue-50" : "border-slate-200 bg-white"}`}>
+                    <div className="flex items-center gap-3">
+                      <PersonAvatar name={patient.name.split(" ").map((part) => part[0]).join("").slice(0, 2)} />
+                      <div>
+                        <p className="font-black text-ink">{patient.name}</p>
+                        <p className="text-sm text-muted">{patient.age} años · {patient.condition}</p>
+                      </div>
+                    </div>
+                    {isSelected && <Check className="text-primary" size={20} />}
+                  </button>
+                );
+              })}
+            </div>
+          </Card>
+
+          {patientFormOpen && (
+            <Card className="space-y-3">
+              <p className="font-black">{patientFormOpen === "new" ? "Alta de paciente" : "Modificar paciente"}</p>
+              <MockInput label="Nombre" value={patientDraft.name} onChange={(value) => setPatientDraft({ ...patientDraft, name: value })} onFocus={applySuggestedPatient} hint="Tocá para crear una ficha sugerida" />
+              <MockInput label="Edad" value={patientDraft.age} onChange={(value) => setPatientDraft({ ...patientDraft, age: value })} />
+              <MockInput label="Dato de cuidado" value={patientDraft.condition} onChange={(value) => setPatientDraft({ ...patientDraft, condition: value })} />
+              <div className="grid grid-cols-2 gap-2">
+                <PrimaryButton onClick={savePatient}>Guardar</PrimaryButton>
+                <SecondaryButton onClick={() => setPatientFormOpen(null)}>Cancelar</SecondaryButton>
+              </div>
+            </Card>
+          )}
+
+          {selectedPatient && (
+            <Card>
+              <div className="flex items-start justify-between gap-3">
+                <div>
+                  <p className="text-sm font-bold text-primary">Paciente seleccionado</p>
+                  <h2 className="mt-1 text-2xl font-black">{selectedPatient.name}</h2>
+                  <p className="mt-1 text-sm text-muted">{selectedPatient.age} años · {selectedPatient.condition}</p>
+                </div>
+                <div className="flex gap-2">
+                  <button onClick={() => openPatientForm("edit")} className="flex h-10 w-10 items-center justify-center rounded-full bg-blue-50 text-primary" aria-label="Modificar paciente"><Pencil size={17} /></button>
+                  <button onClick={() => deletePatient(selectedPatient.id)} className="flex h-10 w-10 items-center justify-center rounded-full bg-red-50 text-attention" aria-label="Dar de baja paciente"><Trash2 size={17} /></button>
+                </div>
+              </div>
+              <div className="mt-4 divide-y divide-slate-100">
+                <FieldRow label="Acompañantes" value={selectedPatient.companions.join(", ") || "Sin acompañantes"} />
+              </div>
+              <div className="mt-4 grid grid-cols-2 gap-2">
+                <SecondaryButton onClick={() => go("event")}>Preparar consulta</SecondaryButton>
+                <SecondaryButton onClick={() => go("delegate")}>Sumar acompañante</SecondaryButton>
+              </div>
+            </Card>
+          )}
+
+          <SectionTitle title="Historial médico" subtitle="Documentos y eventos del paciente seleccionado." />
+          {selectedPatient?.history.map((item) => (
+            <Card key={item.title} className="flex items-center justify-between gap-3">
+              <div>
+                <p className="font-black">{item.title}</p>
+                <p className="text-sm text-muted">{item.detail}</p>
+              </div>
+              <FileText className="shrink-0 text-primary" />
+            </Card>
+          ))}
+        </>
+      )}
+
+      {tab === "companions" && (
+        <>
+          <Card>
+            <div className="flex items-center justify-between gap-3">
+              <div>
+                <p className="font-black">Acompañantes</p>
+                <p className="text-sm text-muted">Personas que pueden ayudar con permisos claros.</p>
+              </div>
+              <button onClick={() => openCompanionForm("new")} className="flex h-11 w-11 items-center justify-center rounded-full bg-primary text-white" aria-label="Dar de alta acompañante">
+                <Plus size={20} />
+              </button>
+            </div>
+          </Card>
+
+          {companionFormOpen && (
+            <Card className="space-y-3">
+              <p className="font-black">{companionFormOpen === "new" ? "Alta de acompañante" : "Modificar acompañante"}</p>
+              <MockInput label="Nombre" value={companionDraft.name} onChange={(value) => setCompanionDraft({ ...companionDraft, name: value })} />
+              <MockInput label="Rol" value={companionDraft.role} onChange={(value) => setCompanionDraft({ ...companionDraft, role: value })} onFocus={applySuggestedCompanionRole} hint="Tocá para crear un rol sugerido" />
+              <MockInput label="Permiso" value={companionDraft.access} onChange={(value) => setCompanionDraft({ ...companionDraft, access: value })} />
+              <MockInput label="Pacientes asignados" value={companionDraft.patients} onChange={(value) => setCompanionDraft({ ...companionDraft, patients: value })} />
+              <div className="grid grid-cols-2 gap-2">
+                <PrimaryButton onClick={saveCompanion}>Guardar</PrimaryButton>
+                <SecondaryButton onClick={() => setCompanionFormOpen(null)}>Cancelar</SecondaryButton>
+              </div>
+            </Card>
+          )}
+
+          {companions.map((companion) => (
+            <Card key={companion.id}>
+              <div className="flex items-start justify-between gap-3">
+                <div className="flex items-center gap-3">
+                  <PersonAvatar name={companion.name.split(" ").map((part) => part[0]).join("").slice(0, 2)} />
+                  <div>
+                    <p className="font-black text-ink">{companion.name}</p>
+                    <p className="text-sm text-muted">{companion.role}</p>
+                  </div>
+                </div>
+                <div className="flex gap-2">
+                  <button onClick={() => openCompanionForm("edit", companion)} className="flex h-10 w-10 items-center justify-center rounded-full bg-blue-50 text-primary" aria-label={`Modificar ${companion.name}`}><Pencil size={17} /></button>
+                  <button onClick={() => setCompanions((current) => current.filter((item) => item.id !== companion.id))} className="flex h-10 w-10 items-center justify-center rounded-full bg-red-50 text-attention" aria-label={`Dar de baja ${companion.name}`}><Trash2 size={17} /></button>
+                </div>
+              </div>
+              <div className="mt-4 divide-y divide-slate-100">
+                <FieldRow label="Permiso" value={companion.access} />
+                <FieldRow label="Pacientes" value={companion.patients.join(", ") || "Sin asignar"} />
+              </div>
+            </Card>
+          ))}
+        </>
+      )}
     </div>
   );
 }
@@ -513,7 +774,17 @@ function MedicalEvent({ go }: { go: (screen: Screen) => void }) {
   );
 }
 
-function DelegateCare({ go, accessSent, setAccessSent }: { go: (screen: Screen) => void; accessSent: boolean; setAccessSent: (v: boolean) => void }) {
+function DelegateCare({
+  go,
+  accessSent,
+  setAccessSent,
+  onCompanionAssigned
+}: {
+  go: (screen: Screen) => void;
+  accessSent: boolean;
+  setAccessSent: (v: boolean) => void;
+  onCompanionAssigned: (name: string) => void;
+}) {
   const companions = [
     { id: "pablo", name: "Pablo Gómez", shortName: "Pablo", role: "Familiar colaborador" },
     { id: "laura", name: "Laura", shortName: "Laura", role: "Cuidadora ocasional" }
@@ -539,6 +810,7 @@ function DelegateCare({ go, accessSent, setAccessSent }: { go: (screen: Screen) 
   const [selectedCompanionId, setSelectedCompanionId] = useState("pablo");
   const [delegateStep, setDelegateStep] = useState<1 | 2 | 3>(1);
   const [searchTerm, setSearchTerm] = useState("");
+  const [sending, setSending] = useState(false);
   const [selectedNoteIds, setSelectedNoteIds] = useState(notesForMessage.map((note) => note.id));
   const [selectedDocumentIds, setSelectedDocumentIds] = useState(documentsForMessage.map((document) => document.id));
   const [selectedPackingIds, setSelectedPackingIds] = useState(packingForMessage.map((item) => item.id));
@@ -555,6 +827,7 @@ function DelegateCare({ go, accessSent, setAccessSent }: { go: (screen: Screen) 
   const selectCompanion = (id: string) => {
     setSelectedCompanionId(id);
     setAccessSent(false);
+    setSending(false);
   };
   const toggleSelected = (id: string, selectedIds: string[], setSelectedIds: (ids: string[]) => void) => {
     setSelectedIds(selectedIds.includes(id) ? selectedIds.filter((selectedId) => selectedId !== id) : [...selectedIds, id]);
@@ -564,10 +837,32 @@ function DelegateCare({ go, accessSent, setAccessSent }: { go: (screen: Screen) 
     setDelegateStep(step);
     window.scrollTo({ top: 0, behavior: "smooth" });
   };
+  const sendMessage = () => {
+    if (sending) return;
+    setSending(true);
+    setAccessSent(true);
+    onCompanionAssigned(selectedCompanion.shortName);
+    window.setTimeout(() => {
+      go("dashboard");
+      setAccessSent(false);
+    }, 1300);
+  };
 
   return (
     <div className="space-y-4">
-      {accessSent && <div className="rounded-2xl bg-emerald-50 p-4 font-bold text-emerald-700">Mensaje listo para enviar a {selectedCompanion.shortName}</div>}
+      {accessSent && (
+        <div className="send-confirmation rounded-3xl bg-emerald-50 p-4 text-emerald-700 shadow-soft">
+          <div className="flex items-center gap-3">
+            <span className="flex h-11 w-11 items-center justify-center rounded-full bg-care text-white">
+              <Check size={22} />
+            </span>
+            <div>
+              <p className="font-black">Mensaje enviado</p>
+              <p className="text-sm font-semibold">Tarea asignada a acompañante {selectedCompanion.shortName}</p>
+            </div>
+          </div>
+        </div>
+      )}
       <SectionTitle title="Sumar acompañante" subtitle="Armá el mensaje en tres pasos." />
       <StepProgress current={delegateStep} />
 
@@ -710,7 +1005,7 @@ function DelegateCare({ go, accessSent, setAccessSent }: { go: (screen: Screen) 
             <p className="font-black text-ink">Qué se comparte</p>
             <p className="mt-1 text-sm leading-6 text-muted">Solo los datos de esta cita y los documentos marcados para llevar. No se comparte el historial completo de Mamá Elena.</p>
           </Card>
-          <PrimaryButton className="w-full" onClick={() => setAccessSent(true)}>Enviar por WhatsApp</PrimaryButton>
+          <PrimaryButton className="w-full" onClick={sendMessage}>{sending ? "Enviando..." : "Enviar por WhatsApp"}</PrimaryButton>
           <SecondaryButton className="w-full" onClick={() => moveToStep(2)}>Editar selección</SecondaryButton>
         </>
       )}
@@ -810,23 +1105,18 @@ function SelectionGroup({
 function TasksScreen({ go }: { go: (screen: Screen) => void }) {
   return (
     <div className="space-y-4">
-      <SectionTitle title="Tareas compartidas" subtitle="Estado común para la familia" />
       <Card>
         <div className="flex items-center justify-between">
-          <p className="font-black">Nueva tarea</p>
-          <StatusBadge status="Mock" tone="blue" />
+          <div>
+            <p className="text-sm font-bold text-primary">Mamá Elena</p>
+            <h1 className="mt-1 text-2xl font-black">Recordatorios</h1>
+            <p className="mt-1 text-sm text-muted">Rutinas configuradas con mensajes amables.</p>
+          </div>
+          <StatusBadge status="1 activo" tone="green" />
         </div>
-        <div className="mt-3 divide-y divide-slate-100">
-          <FieldRow label="Tarea" value="Retirar medicación" />
-          <FieldRow label="Paciente" value="Mamá Elena" />
-          <FieldRow label="Responsable" value="Pablo" />
-          <FieldRow label="Vence" value="Mañana 18:00" />
-        </div>
-        <PrimaryButton className="mt-4 w-full">Agregar tarea</PrimaryButton>
       </Card>
-      <div className="flex gap-2 overflow-x-auto pb-1">{["Pendiente", "En curso", "Hecho", "Por persona"].map((x, i) => <Chip active={i === 0} key={x}>{x}</Chip>)}</div>
-      {tasks.map((task) => <TaskCard key={task.id} task={task} />)}
-      <SecondaryButton className="w-full" onClick={() => go("support")}>Configurar mensaje automático</SecondaryButton>
+      {reminders.map((reminder) => <ReminderCard key={reminder.id} reminder={reminder} onEdit={() => go("support")} />)}
+      <PrimaryButton className="w-full" onClick={() => go("support")}>Crear recordatorio</PrimaryButton>
     </div>
   );
 }
@@ -834,13 +1124,15 @@ function TasksScreen({ go }: { go: (screen: Screen) => void }) {
 function SupportScreen({ go }: { go: (screen: Screen) => void }) {
   const [messageEnabled, setMessageEnabled] = useState(true);
   const [notifyFamily, setNotifyFamily] = useState(true);
+  const [recordingAudio, setRecordingAudio] = useState(false);
+  const [audioReady, setAudioReady] = useState(false);
 
   return (
     <div className="space-y-4">
       <Card>
         <p className="text-sm font-bold text-primary">Mamá Elena</p>
-        <h1 className="mt-1 text-2xl font-black">Mensaje automático</h1>
-        <p className="mt-2 text-sm leading-6 text-muted">Configurá un mensaje amable para la rutina de medicación. Elena puede confirmar, pedir ayuda o elegir que se lo recuerden más tarde.</p>
+        <h1 className="mt-1 text-2xl font-black">Configurar recordatorio</h1>
+        <p className="mt-2 text-sm leading-6 text-muted">Definí el mensaje automático que Elena recibe por WhatsApp. Puede incluir texto, opciones de respuesta y un audio grabado.</p>
       </Card>
       <Card className="space-y-3">
         <PermissionToggle label="Mensaje activo" checked={messageEnabled} onChange={() => setMessageEnabled(!messageEnabled)} />
@@ -852,22 +1144,50 @@ function SupportScreen({ go }: { go: (screen: Screen) => void }) {
       <Card>
         <p className="font-black text-ink">Mensaje para Elena</p>
         <div className="mt-3 rounded-2xl bg-slate-50 p-3 text-sm leading-6 text-ink">
-          Hola Elena, es momento de tu medicación de la noche: Losartán 50 mg. Podés responder: 1 ya lo tomé, 2 recordame en 10 minutos, 3 necesito ayuda.
+          Hola Elena, es momento de tu medicación de la noche: Losartán 50 mg.
         </div>
-        <div className="mt-3 grid grid-cols-3 gap-2">
-          <Chip active>1 Ya lo tomé</Chip>
-          <Chip>2 Más tarde</Chip>
-          <Chip>3 Ayuda</Chip>
+      </Card>
+      <Card>
+        <div className="flex items-start justify-between gap-3">
+          <div>
+            <p className="font-black text-ink">Audio para WhatsApp</p>
+            <p className="mt-1 text-sm leading-6 text-muted">Grabá una nota de voz breve para que el recordatorio llegue con un tono más cercano.</p>
+          </div>
+          <StatusBadge status={audioReady ? "Audio listo" : recordingAudio ? "Grabando" : "Sin audio"} tone={audioReady ? "green" : recordingAudio ? "amber" : "slate"} />
+        </div>
+        <div className="mt-4 rounded-2xl bg-slate-50 p-3">
+          <div className="flex items-center gap-3">
+            <span className={`flex h-12 w-12 shrink-0 items-center justify-center rounded-full ${recordingAudio ? "bg-red-50 text-attention" : "bg-emerald-50 text-care"}`}>
+              {recordingAudio ? <Square size={18} /> : <Mic size={20} />}
+            </span>
+            <div>
+              <p className="font-black text-ink">{recordingAudio ? "Grabando audio..." : audioReady ? "Audio de 00:12 preparado" : "Sin audio grabado"}</p>
+              <p className="text-sm text-muted">{audioReady ? "Se enviará junto al mensaje automático." : "Mock de grabación, no usa micrófono real."}</p>
+            </div>
+          </div>
+          {audioReady && (
+            <div className="mt-3 flex items-center gap-2 rounded-2xl bg-white p-3">
+              <Play size={17} className="text-primary" />
+              <div className="h-2 flex-1 rounded-full bg-slate-100">
+                <div className="h-2 w-2/3 rounded-full bg-primary" />
+              </div>
+              <span className="text-xs font-black text-muted">00:12</span>
+            </div>
+          )}
+        </div>
+        <div className="mt-4 grid grid-cols-2 gap-2">
+          <SecondaryButton onClick={() => { setRecordingAudio(true); setAudioReady(false); }}>Grabar audio</SecondaryButton>
+          <SecondaryButton onClick={() => { setRecordingAudio(false); setAudioReady(true); }}>Detener</SecondaryButton>
         </div>
       </Card>
       <Card className="space-y-3">
-        <PermissionToggle label="Avisar a Pablo si no hay confirmación" checked={notifyFamily} onChange={() => setNotifyFamily(!notifyFamily)} />
-        <FieldRow label="Condición" value="Después de 2 recordatorios" />
-        <FieldRow label="Mensaje a Pablo" value="Elena aún no confirmó" />
-        <p className="text-sm leading-6 text-muted">Pablo recibe un estado general, no actividad minuto a minuto.</p>
+        <PermissionToggle label="Enviar mensaje de apoyo" checked={notifyFamily} onChange={() => setNotifyFamily(!notifyFamily)} />
+        <FieldRow label="A quién" value="Pablo" />
+        <FieldRow label="Cuando" value="Después del recordatorio de Elena" />
+        <FieldRow label="Mensaje" value="Elena recibió el recordatorio de Losartán 50 mg." />
+        <p className="text-sm leading-6 text-muted">Pablo recibe una actualización general del recordatorio, no una vigilancia de actividad.</p>
       </Card>
-      <PrimaryButton className="w-full">Guardar configuración</PrimaryButton>
-      <SecondaryButton className="w-full" onClick={() => go("history")}>Ver historial de mensajes</SecondaryButton>
+      <PrimaryButton className="w-full" onClick={() => go("tasks")}>Guardar configuración</PrimaryButton>
     </div>
   );
 }
@@ -921,6 +1241,24 @@ function FieldRow({ label, value }: { label: string; value: string }) {
   return <div className="flex items-center justify-between gap-4 py-3"><span className="text-sm text-muted">{label}</span><span className="text-right font-bold text-ink">{value}</span></div>;
 }
 
+function MockInput({ label, value, onChange, onFocus, hint }: { label: string; value: string; onChange: (value: string) => void; onFocus?: () => void; hint?: string }) {
+  return (
+    <label className="block">
+      <span className="flex items-center justify-between gap-2 text-xs font-black uppercase text-muted">
+        {label}
+        {hint && <span className="normal-case text-primary">{hint}</span>}
+      </span>
+      <input
+        className="mt-1 w-full rounded-2xl border border-slate-200 bg-slate-50 px-3 py-3 font-semibold text-ink outline-none focus:border-primary focus:bg-white"
+        value={value}
+        onChange={(event) => onChange(event.target.value)}
+        onFocus={onFocus}
+        onClick={onFocus}
+      />
+    </label>
+  );
+}
+
 function PrepFieldRow({ label, value, editing }: { label: string; value: string; editing: boolean }) {
   return (
     <div className="flex items-center justify-between gap-3 py-3">
@@ -965,8 +1303,28 @@ function PatientCard({ title, detail, meta, status, onClick, hasNew = false }: {
   );
 }
 
-function TaskCard({ task }: { task: (typeof tasks)[number] }) {
-  return <Card><div className="flex items-start justify-between gap-3"><div><p className="font-black">{task.title}</p><p className="mt-1 text-sm text-muted">Responsable: {task.owner} · Paciente: {task.patient}</p><p className="text-sm text-muted">Vence: {task.due}</p></div><StatusBadge status={task.status} tone={toneForStatus(task.status)} /></div><PrimaryButton className="mt-4 w-full">Acción principal</PrimaryButton></Card>;
+function ReminderCard({ reminder, onEdit }: { reminder: (typeof reminders)[number]; onEdit: () => void }) {
+  return (
+    <Card>
+      <div className="flex items-start justify-between gap-3">
+        <div className="flex gap-3">
+          <span className="flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl bg-emerald-50 text-care">
+            <Bell size={19} />
+          </span>
+          <div>
+            <p className="font-black">{reminder.title}</p>
+            <p className="mt-1 text-sm text-muted">{reminder.detail}</p>
+            <p className="mt-2 text-sm font-black text-ink">{reminder.time}</p>
+          </div>
+        </div>
+        <StatusBadge status={reminder.status} tone={toneForStatus(reminder.status)} />
+      </div>
+      <div className="mt-4 grid grid-cols-2 gap-2">
+        <SecondaryButton onClick={onEdit}>Editar</SecondaryButton>
+        <SecondaryButton>Pausar</SecondaryButton>
+      </div>
+    </Card>
+  );
 }
 
 function PermissionToggle({ label, checked, onChange }: { label: string; checked: boolean; onChange: () => void }) {
