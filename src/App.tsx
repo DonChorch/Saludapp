@@ -1271,10 +1271,14 @@ function HistoryScreen() {
   return (
     <div className="space-y-4">
       <SectionTitle title="Historial" subtitle="Hora, dónde, quién y qué pasó en cada movimiento." />
-      <div className="flex gap-2 overflow-x-auto pb-1">
+      <div className="sticky top-[72px] z-10 -mx-1 grid grid-cols-5 gap-1 bg-surface/95 px-1 py-2 backdrop-blur">
         {filters.map((filter) => (
-          <button key={filter.id} onClick={() => setActiveFilter(filter.id)}>
-            <Chip active={activeFilter === filter.id}>{filter.label}</Chip>
+          <button
+            key={filter.id}
+            onClick={() => setActiveFilter(filter.id)}
+            className={`min-h-10 rounded-full px-1.5 text-[11px] font-black transition ${activeFilter === filter.id ? "bg-primary text-white shadow-sm" : "bg-slate-100 text-muted"}`}
+          >
+            {filter.label}
           </button>
         ))}
       </div>
