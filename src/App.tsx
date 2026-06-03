@@ -88,13 +88,78 @@ const medicalFiles = [
 ];
 
 const activityLog = [
-  { id: "log-1", time: "09:12", text: "Marina reenvió receta desde WhatsApp" },
-  { id: "log-2", time: "09:13", text: "Sistema clasificó como Receta / Mamá Elena" },
-  { id: "log-3", time: "09:14", text: "Marina confirmó clasificación" },
-  { id: "log-4", time: "09:16", text: "Se creó recordatorio de medicación" },
-  { id: "log-5", time: "09:20", text: "Se compartió acceso temporal con Pablo" },
-  { id: "log-6", time: "20:00", text: "Elena recibió recordatorio amable" },
-  { id: "log-7", time: "20:08", text: "Elena confirmó medicación" }
+  {
+    id: "log-1",
+    category: "document",
+    time: "09:12",
+    where: "Inicio del flujo",
+    who: "Marina",
+    what: "Reenvió IMG_3482.jpg desde WhatsApp para guardar una receta de Mamá Elena."
+  },
+  {
+    id: "log-2",
+    category: "document",
+    time: "09:13",
+    where: "Clasificación",
+    who: "Salud en equipo",
+    what: "Detectó fecha, paciente, tipo de documento, medicación y origen del archivo."
+  },
+  {
+    id: "log-3",
+    category: "patient",
+    time: "09:14",
+    where: "Historia de Mamá Elena",
+    who: "Marina",
+    what: "Confirmó la clasificación y guardó la receta en Recetas > Cardiología."
+  },
+  {
+    id: "log-4",
+    category: "task",
+    time: "09:16",
+    where: "Recordatorios",
+    who: "Marina",
+    what: "Creó el recordatorio Losartán 50 mg para las 20:00."
+  },
+  {
+    id: "log-5",
+    category: "document",
+    time: "09:18",
+    where: "Evento médico",
+    who: "Marina",
+    what: "Adjuntó ECG 2025, Laboratorio abril, Orden médica y Credencial al control de cardiología."
+  },
+  {
+    id: "log-6",
+    category: "family",
+    time: "09:20",
+    where: "Acompañante",
+    who: "Marina",
+    what: "Asignó a Pablo como acompañante y preparó un mensaje de WhatsApp con cita y documentos."
+  },
+  {
+    id: "log-7",
+    category: "family",
+    time: "09:21",
+    where: "Permisos",
+    who: "Salud en equipo",
+    what: "Limitó lo compartido con Pablo al evento de cardiología y sus documentos adjuntos."
+  },
+  {
+    id: "log-8",
+    category: "task",
+    time: "20:00",
+    where: "WhatsApp",
+    who: "Salud en equipo",
+    what: "Envió a Elena el recordatorio automático de Losartán 50 mg."
+  },
+  {
+    id: "log-9",
+    category: "family",
+    time: "20:01",
+    where: "Mensaje de apoyo",
+    who: "Salud en equipo",
+    what: "Envió a Pablo una actualización general: Elena recibió el recordatorio."
+  }
 ];
 
 const screenTitles: Record<Screen, string> = {
@@ -1193,12 +1258,28 @@ function SupportScreen({ go }: { go: (screen: Screen) => void }) {
 }
 
 function HistoryScreen() {
+  const filters = [
+    { id: "all", label: "Todos" },
+    { id: "patient", label: "Pacientes" },
+    { id: "document", label: "Archivos" },
+    { id: "task", label: "Tarea" },
+    { id: "family", label: "Familiar" }
+  ] as const;
+  const [activeFilter, setActiveFilter] = useState<(typeof filters)[number]["id"]>("all");
+  const filteredLog = activeFilter === "all" ? activityLog : activityLog.filter((item) => item.category === activeFilter);
+
   return (
     <div className="space-y-4">
-      <SectionTitle title="Actividad reciente" subtitle="La trazabilidad permite coordinar sin perseguir." />
-      <div className="flex gap-2 overflow-x-auto pb-1">{["Por paciente", "Por documento", "Por tarea", "Por familiar"].map((x, i) => <Chip active={i === 0} key={x}>{x}</Chip>)}</div>
+      <SectionTitle title="Historial" subtitle="Hora, dónde, quién y qué pasó en cada movimiento." />
+      <div className="flex gap-2 overflow-x-auto pb-1">
+        {filters.map((filter) => (
+          <button key={filter.id} onClick={() => setActiveFilter(filter.id)}>
+            <Chip active={activeFilter === filter.id}>{filter.label}</Chip>
+          </button>
+        ))}
+      </div>
       <Card>
-        {activityLog.map((item, index) => <TimelineItem key={item.id} item={item} last={index === activityLog.length - 1} />)}
+        {filteredLog.map((item, index) => <TimelineItem key={item.id} item={item} last={index === filteredLog.length - 1} />)}
       </Card>
     </div>
   );
@@ -1332,7 +1413,26 @@ function PermissionToggle({ label, checked, onChange }: { label: string; checked
 }
 
 function TimelineItem({ item, last }: { item: (typeof activityLog)[number]; last: boolean }) {
-  return <div className="flex gap-3"><div className="flex flex-col items-center"><div className="mt-1 h-3 w-3 rounded-full bg-primary" />{!last && <div className="h-full min-h-12 w-px bg-slate-200" />}</div><div className="pb-5"><p className="font-black">{item.time}</p><p className="text-sm text-muted">{item.text}</p></div></div>;
+  return (
+    <div className="flex gap-3">
+      <div className="flex flex-col items-center">
+        <div className="mt-1 h-3 w-3 rounded-full bg-primary" />
+        {!last && <div className="h-full min-h-20 w-px bg-slate-200" />}
+      </div>
+      <div className="pb-5">
+        <div className="grid grid-cols-[72px_1fr] gap-x-3 gap-y-2 text-sm">
+          <span className="font-black text-muted">Hora</span>
+          <span className="font-black text-ink">{item.time}</span>
+          <span className="font-black text-muted">Dónde</span>
+          <span className="font-semibold text-ink">{item.where}</span>
+          <span className="font-black text-muted">Quién</span>
+          <span className="font-semibold text-ink">{item.who}</span>
+          <span className="font-black text-muted">Qué</span>
+          <span className="leading-6 text-muted">{item.what}</span>
+        </div>
+      </div>
+    </div>
+  );
 }
 
 function ConsultationNotes() {
