@@ -1,0 +1,26 @@
+{
+  "name": "salud-en-equipo-research-aligned",
+  "private": true,
+  "version": "0.1.0",
+  "type": "module",
+  "scripts": {
+    "dev": "vite --host 127.0.0.1",
+    "build": "tsc -b && vite build",
+    "preview": "vite preview --host 127.0.0.1"
+  },
+  "dependencies": {
+    "@vitejs/plugin-react": "^4.3.4",
+    "vite": "^5.4.21",
+    "typescript": "^5.8.3",
+    "react": "latest",
+    "react-dom": "latest",
+    "lucide-react": "latest"
+  },
+  "devDependencies": {
+    "@types/react": "latest",
+    "@types/react-dom": "latest",
+    "tailwindcss": "^3.4.17",
+    "postcss": "^8.5.6",
+    "autoprefixer": "^10.4.21"
+  }
+}
