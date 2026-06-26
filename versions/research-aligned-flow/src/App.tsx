@@ -7,6 +7,7 @@
   FileText,
   HeartHandshake,
   Home,
+  Loader2,
   LockKeyhole,
   MapPin,
   Mic,
@@ -258,8 +259,23 @@ function toneForStatus(status: string): StatusTone {
   return "slate";
 }
 
+function displayUserName(name: string) {
+  return name.trim() || "Marina";
+}
+
+function initialsForName(name: string) {
+  return displayUserName(name)
+    .split(" ")
+    .filter(Boolean)
+    .slice(0, 2)
+    .map((part) => part[0])
+    .join("")
+    .toUpperCase();
+}
+
 function App() {
   const [screen, setScreen] = useState<Screen>("chat");
+  const [testerName, setTesterName] = useState("");
   const [saved, setSaved] = useState(false);
   const [accessSent, setAccessSent] = useState(false);
   const [companionAssignment, setCompanionAssignment] = useState<string | null>(null);
@@ -272,6 +288,20 @@ function App() {
   const go = (next: Screen) => {
     window.scrollTo({ top: 0, behavior: "smooth" });
     setScreen(next);
+  };
+
+  const resetDemo = () => {
+    setSaved(false);
+    setAccessSent(false);
+    setCompanionAssignment(null);
+    setSituations(initialSituations);
+    setAgendaCreateToken(0);
+    setAgendaIntent("Evento médico");
+    setPatientCreateToken(0);
+    setCompanionCreateToken(0);
+    setTesterName("");
+    window.scrollTo({ top: 0, behavior: "smooth" });
+    setScreen("chat");
   };
 
   return (
@@ -294,17 +324,17 @@ function App() {
     >
       {!["landing", "chat"].includes(screen) && <Header title={screenTitles[screen]} go={go} />}
       {screen === "landing" && <Landing go={go} />}
-      {screen === "chat" && <ChatSimulation go={go} />}
+      {screen === "chat" && <ChatSimulation go={go} testerName={testerName} setTesterName={setTesterName} />}
       {screen === "classification" && <Classification go={go} saved={saved} setSaved={setSaved} />}
-      {screen === "dashboard" && <Dashboard go={go} companionAssignment={companionAssignment} situations={situations} />}
+      {screen === "dashboard" && <Dashboard go={go} companionAssignment={companionAssignment} situations={situations} testerName={displayUserName(testerName)} />}
       {screen === "agenda" && <AgendaScreen go={go} situations={situations} setSituations={setSituations} createToken={agendaCreateToken} createIntent={agendaIntent} />}
-      {screen === "patient" && <PatientProfile go={go} patientCreateToken={patientCreateToken} companionCreateToken={companionCreateToken} />}
-      {screen === "event" && <MedicalEvent go={go} />}
-      {screen === "delegate" && <DelegateCare go={go} accessSent={accessSent} setAccessSent={setAccessSent} onCompanionAssigned={setCompanionAssignment} />}
+      {screen === "patient" && <PatientProfile go={go} patientCreateToken={patientCreateToken} companionCreateToken={companionCreateToken} testerName={displayUserName(testerName)} />}
+      {screen === "event" && <MedicalEvent go={go} testerName={displayUserName(testerName)} />}
+      {screen === "delegate" && <DelegateCare go={go} accessSent={accessSent} setAccessSent={setAccessSent} onCompanionAssigned={setCompanionAssignment} testerName={displayUserName(testerName)} />}
       {screen === "tasks" && <TasksScreen go={go} />}
       {screen === "support" && <SupportScreen go={go} />}
-      {screen === "history" && <HistoryScreen />}
-      {screen === "settings" && <SettingsScreen go={go} />}
+      {screen === "history" && <HistoryScreen testerName={displayUserName(testerName)} />}
+      {screen === "settings" && <SettingsScreen go={go} onResetDemo={resetDemo} testerName={displayUserName(testerName)} />}
     </AppShell>
   );
 }
@@ -332,7 +362,7 @@ function AppShell({
         {children}
       </main>
       {!["landing", "chat"].includes(screen) && <BottomNav active={screen} go={go} />}
-      {["dashboard", "agenda", "patient", "settings"].includes(screen) && (
+      {["dashboard", "agenda", "patient"].includes(screen) && (
         <ActionFab
           key={screen}
           active={screen}
@@ -424,11 +454,7 @@ function ActionFab({
       { label: "Alta acompañante", icon: HeartHandshake, action: onNewCompanion, title: "¿Dar de alta acompañante?", description: "Se abrirá el formulario para agregar un acompañante.", confirmLabel: "Crear" },
       { label: "Compartir acceso", icon: ShieldCheck, action: () => go("delegate"), title: "¿Compartir acceso?", description: "Se abrirá el flujo para elegir qué información compartir.", confirmLabel: "Continuar" }
     ],
-    settings: [
-      { label: "Ver historial", icon: ClipboardList, action: () => go("history"), title: "¿Ver historial?", description: "Se abrirá la trazabilidad de actividad reciente.", confirmLabel: "Ver" },
-      { label: "Privacidad", icon: LockKeyhole, action: () => go("settings"), title: "¿Revisar privacidad?", description: "Vas a revisar preferencias y accesos.", confirmLabel: "Revisar" },
-      { label: "Nuevo perfil", icon: Users, action: onNewPatient, title: "¿Crear perfil?", description: "Se abrirá el alta de un nuevo paciente.", confirmLabel: "Crear" }
-    ]
+    settings: []
   };
   const actions = actionMap[active] ?? actionMap.dashboard;
 
@@ -608,17 +634,51 @@ function OnboardingMotifs({ tone, step }: { tone: "primary" | "care" | "warm"; s
   );
 }
 
-function ChatSimulation({ go }: { go: (screen: Screen) => void }) {
+function ChatSimulation({
+  go,
+  testerName,
+  setTesterName
+}: {
+  go: (screen: Screen) => void;
+  testerName: string;
+  setTesterName: (name: string) => void;
+}) {
+  const activeName = displayUserName(testerName);
+  const [started, setStarted] = useState(false);
+
+  if (!started) {
+    return (
+      <div className="flex min-h-[calc(100vh-2rem)] flex-col justify-center space-y-4">
+        <Card>
+          <p className="text-sm font-black uppercase tracking-wide text-primary">Prueba de usabilidad</p>
+          <h1 className="mt-2 text-2xl font-black text-ink">Gracias por participar</h1>
+          <p className="mt-2 text-sm leading-6 text-muted">
+            Vas a recorrer una simulación de Salud en equipo para observar si el flujo se entiende: cómo entra información desde WhatsApp, cómo se organiza y cómo se comparte con un acompañante.
+          </p>
+          <p className="mt-4 font-black text-ink">Nombre para personalizar la prueba</p>
+          <p className="mt-1 text-sm leading-6 text-muted">Usaremos este nombre dentro de la app. No se guarda ni se envía a ningún servicio.</p>
+          <input
+            className="mt-3 w-full rounded-2xl border border-line bg-white px-4 py-3 font-bold text-ink outline-none focus:border-primary"
+            placeholder="Ej: Jorge"
+            value={testerName}
+            onChange={(event) => setTesterName(event.target.value)}
+          />
+        </Card>
+        <PrimaryButton className="w-full" onClick={() => setStarted(true)}>Comenzar</PrimaryButton>
+      </div>
+    );
+  }
+
   return (
     <div className="space-y-4">
       <div className="flex items-center justify-between">
-        <span className="rounded-full bg-white px-4 py-2 text-sm font-bold text-ink shadow-sm">Entrada externa</span>
+        <span className="rounded-full bg-white px-4 py-2 text-sm font-bold text-ink shadow-sm">Inicio del flujo</span>
         <span className="rounded-full bg-primarySoft px-3 py-1 text-xs font-bold text-muted">Captura externa</span>
       </div>
       <div className="space-y-2">
-        <h1 className="text-2xl font-black text-ink">Ingreso desde WhatsApp</h1>
+        <h2 className="text-2xl font-black text-ink">Ingreso desde WhatsApp</h2>
         <p className="text-sm leading-6 text-muted">
-          Marina reenvía una receta al contacto Memo. El sistema lee la imagen, pregunta lo mínimo necesario y deja listo el guardado.
+          {activeName} reenvía una receta al contacto Memo. El sistema lee la imagen, pregunta lo mínimo necesario y deja listo el guardado. Leé el chat completo para tener el contexto necesario.
         </p>
       </div>
       <MockPhoneFrame>
@@ -656,7 +716,7 @@ function ChatSimulation({ go }: { go: (screen: Screen) => void }) {
           </ChatBubble>
         </div>
       </MockPhoneFrame>
-      <PrimaryButton className="w-full" onClick={() => go("landing")}>Continuar</PrimaryButton>
+      <PrimaryButton className="w-full" onClick={() => go("landing")}>Continuar como {activeName}</PrimaryButton>
     </div>
   );
 }
@@ -715,18 +775,20 @@ function Classification({ go, saved, setSaved }: { go: (screen: Screen) => void;
 function Dashboard({
   go,
   companionAssignment,
-  situations
+  situations,
+  testerName
 }: {
   go: (screen: Screen) => void;
   companionAssignment: string | null;
   situations: Situation[];
+  testerName: string;
 }) {
   const newEvent = situations.find((situation) => situation.id === "situation-cardio") ?? situations[0];
   const mainIngress = processedIngresses[0];
 
   return (
     <div className="space-y-5">
-      <div><h1 className="text-3xl font-black">Hola, Marina</h1><p className="text-muted">Esto necesita atención hoy.</p></div>
+      <div><h1 className="text-3xl font-black">Hola, {testerName}</h1><p className="text-muted">Esto necesita atención hoy.</p></div>
       {newEvent && (
         <button onClick={() => go("event")} className="w-full text-left">
           <Card className="relative overflow-hidden border-primaryTint bg-primarySoft">
@@ -761,6 +823,17 @@ function Dashboard({
         <div className="mt-4">
           <ProcessedIngressCard item={mainIngress} onClick={() => go("event")} />
         </div>
+        {companionAssignment && (
+          <div className="mt-3 flex items-center gap-3 rounded-2xl border border-careSoft bg-careSoft/70 p-3">
+            <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-care text-white">
+              <Check size={18} />
+            </span>
+            <div>
+              <p className="text-sm font-black text-careDeep">Mensaje enviado a {companionAssignment}</p>
+              <p className="text-xs font-semibold text-muted">Quedó compartida la cita de Mamá Elena con sus documentos marcados.</p>
+            </div>
+          </div>
+        )}
       </Card>
 
       <Card>
@@ -780,29 +853,6 @@ function Dashboard({
           onConfirm={() => go("support")}
         >
           Crear recordatorio
-        </ConfirmActionButton>
-      </Card>
-
-      <Card>
-        <div className="flex items-start justify-between gap-3">
-          <div>
-            <p className="text-sm font-bold text-primary">Coordinación pendiente</p>
-            <h2 className="mt-1 text-xl font-black">{companionAssignment ? "Acompañante asignado" : "Acompañante por asignar"}</h2>
-            <p className="mt-1 text-sm leading-6 text-muted">
-              {companionAssignment ? `Asignada a acompañante ${companionAssignment} para el control de Mamá Elena.` : "Podés enviarle a un acompañante solo los datos de este control."}
-            </p>
-          </div>
-          <StatusBadge status={companionAssignment ? "Asignada" : "Pendiente"} tone={companionAssignment ? "green" : "amber"} />
-        </div>
-        <ConfirmActionButton
-          className="mt-4 w-full"
-          variant="secondary"
-          title="¿Sumar acompañante?"
-          description="Vas a elegir qué información de este evento se comparte por WhatsApp."
-          confirmLabel="Continuar"
-          onConfirm={() => go("delegate")}
-        >
-          Sumar acompañante
         </ConfirmActionButton>
       </Card>
     </div>
@@ -974,11 +1024,13 @@ function AgendaScreen({
 function PatientProfile({
   go,
   patientCreateToken,
-  companionCreateToken
+  companionCreateToken,
+  testerName
 }: {
   go: (screen: Screen) => void;
   patientCreateToken: number;
   companionCreateToken: number;
+  testerName: string;
 }) {
   type ManagedPatient = {
     id: string;
@@ -1010,7 +1062,7 @@ function PatientProfile({
       name: "Tomás",
       age: "9",
       condition: "Vacunas y controles pediátricos",
-      companions: ["Marina", "Pablo"],
+      companions: [testerName, "Pablo"],
       history: [
         { title: "Carnet de vacunas", detail: "Credencial · Foto · 15/05/2026" },
         { title: "Audio: turno pediatra", detail: "Turno · WhatsApp · 21/05/2026" }
@@ -1021,7 +1073,7 @@ function PatientProfile({
       name: "Lucía",
       age: "15",
       condition: "Controles clínicos",
-      companions: ["Marina"],
+      companions: [testerName],
       history: [
         { title: "Resultado laboratorio.pdf", detail: "Laboratorio · PDF · 18/05/2026" }
       ]
@@ -1386,8 +1438,16 @@ function PatientProfile({
   );
 }
 
-function MedicalEvent({ go }: { go: (screen: Screen) => void }) {
+function MedicalEvent({ go, testerName }: { go: (screen: Screen) => void; testerName: string }) {
   const [prepEditing, setPrepEditing] = useState(false);
+  const preparationItems = [
+    "Turno cargado",
+    "Fecha y hora",
+    "Dirección",
+    "Notas para consulta",
+    "Archivos vinculados"
+  ];
+  const preparationProgress = 100;
 
   return (
     <div className="space-y-4">
@@ -1395,8 +1455,11 @@ function MedicalEvent({ go }: { go: (screen: Screen) => void }) {
         <p className="text-sm font-semibold text-primary">Mamá Elena</p>
         <h1 className="mt-1 text-2xl font-black">Control cardiología — Dr. Ruiz</h1>
         <p className="mt-2 text-muted">Mañana, 10:30</p>
-        <div className="mt-4 h-3 rounded-full bg-primarySoft"><div className="h-3 w-4/5 rounded-full bg-care" /></div>
-        <p className="mt-2 text-sm font-bold text-care">80% preparado</p>
+        <div className="mt-4 h-3 overflow-hidden rounded-full bg-primarySoft">
+          <div className="h-3 rounded-full bg-care transition-all" style={{ width: `${preparationProgress}%` }} />
+        </div>
+        <p className="mt-2 text-sm font-bold text-care">Preparación completa</p>
+        <p className="mt-1 text-xs font-semibold text-muted">{preparationItems.length} de {preparationItems.length} datos cargados para este turno.</p>
       </Card>
       <Card>
         <div className="flex items-start justify-between gap-3">
@@ -1409,7 +1472,7 @@ function MedicalEvent({ go }: { go: (screen: Screen) => void }) {
             confirmLabel={prepEditing ? "Salir" : "Editar"}
             onConfirm={() => setPrepEditing(!prepEditing)}
           >
-            Edición
+            {prepEditing ? "Listo" : "Edición"}
           </ConfirmActionButton>
         </div>
         <div className="mt-4 divide-y divide-line">
@@ -1475,8 +1538,8 @@ function MedicalEvent({ go }: { go: (screen: Screen) => void }) {
           </ConfirmActionButton>
         </div>
       </Card>
-      <PackingList />
-      <ConsultationNotes />
+      <PackingList testerName={testerName} />
+      <ConsultationNotes testerName={testerName} />
       <Checklist title="Preparación práctica" subtitle="Sugerido para este turno" items={["Revisar estudios", "Confirmar dirección", "Llevar credencial", "Avisar a acompañante"]} />
       <Card><SectionTitle title="Archivos vinculados" subtitle="ECG_2025.pdf · Laboratorio_Abril.pdf · Receta_Losartan.jpg · Orden_Control.pdf" /></Card>
       <ConfirmActionButton
@@ -1496,12 +1559,14 @@ function DelegateCare({
   go,
   accessSent,
   setAccessSent,
-  onCompanionAssigned
+  onCompanionAssigned,
+  testerName
 }: {
   go: (screen: Screen) => void;
   accessSent: boolean;
   setAccessSent: (v: boolean) => void;
   onCompanionAssigned: (name: string) => void;
+  testerName: string;
 }) {
   const companions = [
     { id: "pablo", name: "Pablo Gómez", shortName: "Pablo", role: "Familiar colaborador" },
@@ -1557,25 +1622,42 @@ function DelegateCare({
   };
   const sendMessage = () => {
     if (sending) return;
+    setAccessSent(false);
     setSending(true);
-    setAccessSent(true);
-    onCompanionAssigned(selectedCompanion.shortName);
+    window.setTimeout(() => {
+      setSending(false);
+      setAccessSent(true);
+      onCompanionAssigned(selectedCompanion.shortName);
+    }, 900);
     window.setTimeout(() => {
       go("dashboard");
       setAccessSent(false);
-    }, 1300);
+    }, 1900);
   };
 
   return (
     <div className="space-y-4">
+      {sending && !accessSent && (
+        <div className="pointer-events-none fixed left-1/2 top-24 z-[80] w-[calc(100%-2rem)] max-w-sm -translate-x-1/2 rounded-[28px] bg-white p-4 text-primary shadow-phone">
+          <div className="flex items-center gap-3">
+            <span className="flex h-11 w-11 items-center justify-center rounded-full bg-primarySoft text-primary">
+              <Loader2 className="animate-spin" size={22} />
+            </span>
+            <div>
+              <p className="font-black">Enviando mensaje</p>
+              <p className="text-sm font-semibold text-muted">Preparando WhatsApp para {selectedCompanion.shortName}</p>
+            </div>
+          </div>
+        </div>
+      )}
       {accessSent && (
-        <div className="send-confirmation rounded-[28px] bg-careSoft p-4 text-careDeep shadow-soft">
+        <div className="send-confirmation pointer-events-none fixed left-1/2 top-24 z-[80] w-[calc(100%-2rem)] max-w-sm -translate-x-1/2 rounded-[28px] bg-careSoft p-4 text-careDeep shadow-phone">
           <div className="flex items-center gap-3">
             <span className="flex h-11 w-11 items-center justify-center rounded-full bg-care text-white">
               <Check size={22} />
             </span>
             <div>
-              <p className="font-black">Mensaje enviado</p>
+              <p className="font-black">Mensaje enviado correctamente</p>
               <p className="text-sm font-semibold">Tarea asignada a acompañante {selectedCompanion.shortName}</p>
             </div>
           </div>
@@ -1710,7 +1792,7 @@ function DelegateCare({
             </div>
             <div className="space-y-3 bg-careSoft p-4">
               <ChatBubble mine>
-                <p className="font-bold">Hola {selectedCompanion.shortName}, Marina te comparte el control de cardiología de Mamá Elena.</p>
+                <p className="font-bold">Hola {selectedCompanion.shortName}, {testerName} te comparte el control de cardiología de Mamá Elena.</p>
                 <div className="mt-3 space-y-1 text-sm">
                   <p><b>1. Datos de la cita</b></p>
                   <p>✓ 30/05 · 10:30</p>
@@ -1764,7 +1846,7 @@ function DelegateCare({
             confirmLabel="Enviar"
             onConfirm={sendMessage}
           >
-            {sending ? "Enviando..." : "Enviar por WhatsApp"}
+            {sending ? <><Loader2 className="animate-spin" size={18} /> Enviando...</> : "Enviar por WhatsApp"}
           </ConfirmActionButton>
           <ConfirmActionButton
             className="w-full"
@@ -1993,56 +2075,117 @@ function SupportScreen({ go }: { go: (screen: Screen) => void }) {
   );
 }
 
-function SettingsScreen({ go }: { go: (screen: Screen) => void }) {
+function SettingsScreen({ go, onResetDemo, testerName }: { go: (screen: Screen) => void; onResetDemo: () => void; testerName: string }) {
   const [appointmentNotifications, setAppointmentNotifications] = useState(true);
   const [reminderNotifications, setReminderNotifications] = useState(true);
   const [sharedNotifications, setSharedNotifications] = useState(true);
 
   return (
     <div className="space-y-4">
-      <SectionTitle title="Ajustes" subtitle="Preferencias, actividad y configuración de la cuenta." />
-      <Card>
+      <SectionTitle title="Ajustes" subtitle="Cuenta, privacidad y preferencias de uso." />
+      <Card className="settings-profile-card">
         <div className="flex items-center gap-3">
-          <PersonAvatar name="MG" />
+          <PersonAvatar name={initialsForName(testerName)} />
           <div>
-            <p className="font-black text-ink">Marina Gómez</p>
-            <p className="text-sm text-muted">Gestora principal</p>
+            <p className="text-lg font-black">{testerName}</p>
+            <p className="text-sm font-semibold text-white/90">Gestora principal de salud familiar</p>
           </div>
         </div>
-        <ConfirmActionButton
-          className="mt-4 w-full"
-          variant="secondary"
-          title="¿Editar perfil?"
-          description="Se abrirá la edición de los datos de Marina."
-          confirmLabel="Editar"
-          onConfirm={() => undefined}
-        >
-          Editar perfil
-        </ConfirmActionButton>
+        <div className="mt-4 grid grid-cols-2 gap-2 text-sm">
+          <div className="rounded-2xl bg-white/20 p-3 ring-1 ring-white/20">
+            <p className="font-black">4 perfiles</p>
+            <p className="mt-1 text-xs font-semibold text-white/85">Familia activa</p>
+          </div>
+          <div className="rounded-2xl bg-white/20 p-3 ring-1 ring-white/20">
+            <p className="font-black">2 accesos</p>
+            <p className="mt-1 text-xs font-semibold text-white/85">Compartidos</p>
+          </div>
+        </div>
       </Card>
+
+      <Card className="space-y-2">
+        <p className="mb-2 font-black text-ink">Cuenta</p>
+        <SettingsRow icon={Users} title="Datos personales" detail="Nombre, rol y contacto" />
+        <SettingsRow icon={HeartHandshake} title="Grupo familiar" detail="Pacientes y acompañantes" onClick={() => go("patient")} />
+      </Card>
+
+      <Card className="space-y-2">
+        <p className="mb-2 font-black text-ink">Privacidad y accesos</p>
+        <SettingsRow icon={LockKeyhole} title="Permisos compartidos" detail="Quién ve qué información" />
+        <SettingsRow icon={ShieldCheck} title="Seguridad de la cuenta" detail="Control de acceso y sesión" />
+        <SettingsRow icon={ClipboardList} title="Actividad reciente" detail="Historial de movimientos" onClick={() => go("history")} />
+      </Card>
+
       <Card className="space-y-3">
         <p className="font-black text-ink">Notificaciones</p>
         <PermissionToggle label="Citas médicas" checked={appointmentNotifications} onChange={() => setAppointmentNotifications(!appointmentNotifications)} />
         <PermissionToggle label="Recordatorios" checked={reminderNotifications} onChange={() => setReminderNotifications(!reminderNotifications)} />
         <PermissionToggle label="Archivos compartidos" checked={sharedNotifications} onChange={() => setSharedNotifications(!sharedNotifications)} />
       </Card>
-      <Card>
-        <p className="font-black text-ink">Actividad</p>
-        <button onClick={() => go("history")} className="mt-3 flex w-full items-center justify-between rounded-2xl bg-paper p-3 text-left">
-          <span className="font-bold text-ink">Historial</span>
-          <ChevronRight className="text-primary" size={18} />
-        </button>
+
+      <Card className="space-y-2">
+        <p className="mb-2 font-black text-ink">Preferencias</p>
+        <SettingsRow icon={Settings} title="Tema" detail="Claro" />
+        <SettingsRow icon={FileText} title="Idioma" detail="Español" />
       </Card>
-      <Card>
-        <p className="font-black text-ink">Preferencias</p>
-        <FieldRow label="Tema" value="Claro" />
-        <FieldRow label="Idioma" value="Español" />
+
+      <Card className="space-y-2">
+        <p className="mb-2 font-black text-ink">Ayuda</p>
+        <SettingsRow icon={HeartHandshake} title="Centro de ayuda" detail="Preguntas frecuentes y soporte" />
+        <SettingsRow icon={ShieldCheck} title="Política de privacidad" detail="Cómo se cuida la información" />
+        <SettingsRow icon={FileText} title="Términos de uso" detail="Condiciones del servicio" />
       </Card>
+
+      <ConfirmActionButton
+        className="w-full border border-attentionSoft bg-white text-attention shadow-sm"
+        variant="secondary"
+        title="¿Cerrar sesión y reiniciar prueba?"
+        description="Se borrarán los cambios simulados de esta sesión y la app volverá al inicio del flujo para empezar una prueba desde cero."
+        confirmLabel="Reiniciar"
+        onConfirm={onResetDemo}
+      >
+        Cerrar sesión
+      </ConfirmActionButton>
     </div>
   );
 }
 
-function HistoryScreen() {
+function SettingsRow({
+  icon: Icon,
+  title,
+  detail,
+  onClick
+}: {
+  icon: typeof Calendar;
+  title: string;
+  detail: string;
+  onClick?: () => void;
+}) {
+  const content = (
+    <>
+      <span className="flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl bg-primarySoft text-primary">
+        <Icon size={19} />
+      </span>
+      <span className="min-w-0 flex-1">
+        <span className="block font-black text-ink">{title}</span>
+        <span className="block text-sm font-semibold text-muted">{detail}</span>
+      </span>
+      <ChevronRight className="shrink-0 text-primary" size={18} />
+    </>
+  );
+
+  if (onClick) {
+    return (
+      <button onClick={onClick} className="flex w-full items-center gap-3 rounded-2xl bg-paper p-3 text-left">
+        {content}
+      </button>
+    );
+  }
+
+  return <div className="flex items-center gap-3 rounded-2xl bg-paper p-3">{content}</div>;
+}
+
+function HistoryScreen({ testerName }: { testerName: string }) {
   const filters = [
     { id: "all", label: "Todos" },
     { id: "patient", label: "Pacientes" },
@@ -2051,7 +2194,12 @@ function HistoryScreen() {
     { id: "family", label: "Familiar" }
   ] as const;
   const [activeFilter, setActiveFilter] = useState<(typeof filters)[number]["id"]>("all");
-  const filteredLog = activeFilter === "all" ? activityLog : activityLog.filter((item) => item.category === activeFilter);
+  const personalizedLog = activityLog.map((item) => ({
+    ...item,
+    who: item.who === "Marina" ? testerName : item.who,
+    what: item.what.replace("Marina", testerName)
+  }));
+  const filteredLog = activeFilter === "all" ? personalizedLog : personalizedLog.filter((item) => item.category === activeFilter);
 
   return (
     <div className="space-y-4">
@@ -2354,7 +2502,7 @@ function PermissionToggle({ label, checked, onChange }: { label: string; checked
   return <button onClick={onChange} className="flex w-full items-center justify-between rounded-2xl bg-paper p-3 text-left"><span className="font-bold">{label}</span><span className={`flex h-7 w-12 items-center rounded-full p-1 transition ${checked ? "bg-care" : "bg-primaryTint"}`}><span className={`h-5 w-5 rounded-full bg-white transition ${checked ? "translate-x-5" : ""}`} /></span></button>;
 }
 
-function TimelineItem({ item, last }: { item: (typeof activityLog)[number]; last: boolean }) {
+function TimelineItem({ item, last }: { item: { time: string; where: string; who: string; what: string }; last: boolean }) {
   return (
     <div className="flex gap-3">
       <div className="flex flex-col items-center">
@@ -2377,7 +2525,7 @@ function TimelineItem({ item, last }: { item: (typeof activityLog)[number]; last
   );
 }
 
-function ConsultationNotes() {
+function ConsultationNotes({ testerName }: { testerName: string }) {
   const [editing, setEditing] = useState(false);
   const notes = [
     "Falta de aire al caminar",
@@ -2391,7 +2539,7 @@ function ConsultationNotes() {
       <div className="flex items-start justify-between gap-3">
         <div>
           <p className="font-black">Notas para consulta</p>
-          <p className="mt-1 text-sm text-muted">Cargadas por Marina. Se pueden editar antes del turno.</p>
+          <p className="mt-1 text-sm text-muted">Cargadas por {testerName}. Se pueden editar antes del turno.</p>
         </div>
         <ConfirmActionButton
           variant="secondary"
@@ -2401,7 +2549,7 @@ function ConsultationNotes() {
           confirmLabel={editing ? "Salir" : "Editar"}
           onConfirm={() => setEditing(!editing)}
         >
-          Edición
+          {editing ? "Listo" : "Edición"}
         </ConfirmActionButton>
       </div>
       <div className="space-y-2">
@@ -2431,7 +2579,7 @@ function ConsultationNotes() {
   );
 }
 
-function PackingList() {
+function PackingList({ testerName }: { testerName: string }) {
   const [editing, setEditing] = useState(false);
   const [checkedItems, setCheckedItems] = useState<Record<string, boolean>>({
     "ECG 2025": true,
@@ -2446,7 +2594,7 @@ function PackingList() {
       <div className="flex items-start justify-between gap-3">
         <div>
           <p className="font-black">Para llevar</p>
-          <p className="mt-1 text-sm text-muted">Lista cargada por Marina para este turno.</p>
+          <p className="mt-1 text-sm text-muted">Lista cargada por {testerName} para este turno.</p>
         </div>
         <ConfirmActionButton
           variant="secondary"
@@ -2456,7 +2604,7 @@ function PackingList() {
           confirmLabel={editing ? "Salir" : "Editar"}
           onConfirm={() => setEditing(!editing)}
         >
-          Edición
+          {editing ? "Listo" : "Edición"}
         </ConfirmActionButton>
       </div>
       <div className="mt-3 space-y-2">

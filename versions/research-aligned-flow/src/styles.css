@@ -44,6 +44,15 @@ select {
   animation: send-confirmation-pop 0.55s ease-out both;
 }
 
+.settings-profile-card {
+  background: #3c3264;
+  color: #ffffff;
+}
+
+.settings-profile-card p {
+  color: inherit;
+}
+
 @keyframes send-confirmation-pop {
   0% {
     opacity: 0;
