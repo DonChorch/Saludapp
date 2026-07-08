@@ -1,1053 +1,1321 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Sangre Azul — Restaurante Gourmet</title>
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,600;0,700;1,400&family=Lato:wght@300;400;700&display=swap" rel="stylesheet">
-  <style>
-    *, *::before, *::after {
-      margin: 0;
-      padding: 0;
-      box-sizing: border-box;
-    }
-
-    :root {
-      --rojo:    #A8192E;
-      --rojo-oscuro: #6b1426;
-      --dorado:  #D4AF37;
-      --crema:   #F5E6D3;
-      --carbon:  #1a1a1a;
-      --gris:    #555;
-      --blanco:  #ffffff;
-    }
-
-    html {
-      scroll-behavior: smooth;
-    }
-
-    body {
-      font-family: 'Lato', sans-serif;
-      color: var(--carbon);
-      line-height: 1.7;
-      background: var(--blanco);
-    }
-
-    /* ─── Utilidades ─────────────────────────────────── */
-    .container {
-      max-width: 1180px;
-      margin: 0 auto;
-      padding: 0 24px;
-    }
-
-    .section-label {
-      display: block;
-      font-family: 'Lato', sans-serif;
-      font-weight: 700;
-      font-size: 11px;
-      letter-spacing: 4px;
-      text-transform: uppercase;
-      color: var(--dorado);
-      margin-bottom: 14px;
-    }
-
-    .section-title {
-      font-family: 'Playfair Display', serif;
-      font-size: clamp(32px, 5vw, 48px);
-      line-height: 1.2;
-      color: var(--rojo);
-    }
-
-    .divider {
-      width: 64px;
-      height: 2px;
-      background: var(--dorado);
-      margin: 20px auto 0;
-    }
-
-    /* ─── Header ─────────────────────────────────────── */
-    header {
-      position: sticky;
-      top: 0;
-      z-index: 200;
-      background: rgba(26, 26, 26, 0.97);
-      backdrop-filter: blur(10px);
-      border-bottom: 1px solid rgba(212, 175, 55, 0.2);
-    }
-
-    .header-inner {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      height: 72px;
-    }
-
-    .logo img {
-      height: 64px;
-      width: auto;
-      display: block;
-      mix-blend-mode: screen;
-      filter: brightness(1.05) contrast(1.1);
-    }
-
-    nav ul {
-      list-style: none;
-      display: flex;
-      gap: 36px;
-    }
-
-    nav a {
-      font-family: 'Lato', sans-serif;
-      font-size: 13px;
-      font-weight: 700;
-      letter-spacing: 2px;
-      text-transform: uppercase;
-      color: rgba(255,255,255,0.85);
-      text-decoration: none;
-      position: relative;
-      transition: color 0.3s;
-    }
-
-    nav a::after {
-      content: '';
-      position: absolute;
-      bottom: -4px;
-      left: 0;
-      width: 0;
-      height: 1px;
-      background: var(--dorado);
-      transition: width 0.3s;
-    }
-
-    nav a:hover {
-      color: var(--dorado);
-    }
-
-    nav a:hover::after {
-      width: 100%;
-    }
-
-    /* ─── Hero ───────────────────────────────────────── */
-    .hero {
-      min-height: 92vh;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      text-align: center;
-      position: relative;
-      overflow: hidden;
-      background: var(--carbon);
-    }
-
-    .hero-bg {
-      position: absolute;
-      inset: 0;
-      background:
-        radial-gradient(ellipse 80% 60% at 50% 30%, rgba(168,25,46,0.55) 0%, transparent 70%),
-        radial-gradient(ellipse 60% 40% at 20% 80%, rgba(107,20,38,0.4) 0%, transparent 60%),
-        radial-gradient(ellipse 40% 30% at 80% 70%, rgba(212,175,55,0.08) 0%, transparent 50%);
-    }
-
-
-    .hero-content {
-      position: relative;
-      z-index: 1;
-      padding: 40px 20px;
-    }
-
-    .hero-eyebrow {
-      font-family: 'Lato', sans-serif;
-      font-size: 11px;
-      font-weight: 700;
-      letter-spacing: 5px;
-      text-transform: uppercase;
-      color: var(--dorado);
-      margin-bottom: 24px;
-      opacity: 0;
-      animation: fadeUp 0.8s 0.2s forwards;
-    }
-
-    .hero h1 {
-      font-family: 'Playfair Display', serif;
-      font-size: clamp(52px, 10vw, 96px);
-      font-weight: 700;
-      letter-spacing: 6px;
-      color: var(--crema);
-      margin-bottom: 8px;
-      opacity: 0;
-      animation: fadeUp 0.9s 0.4s forwards;
-    }
-
-    .hero-logo {
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      width: 100%;
-      margin: 0 auto 4px;
-      opacity: 0;
-      animation: fadeUp 0.9s 0.4s forwards;
-    }
-
-    .hero-logo img {
-      width: min(380px, 70vw);
-      height: auto;
-      display: block;
-      mix-blend-mode: screen;
-      filter: brightness(1.1);
-    }
-
-    .hero-rule {
-      display: flex;
-      align-items: center;
-      gap: 16px;
-      justify-content: center;
-      margin: 18px auto 24px;
-      opacity: 0;
-      animation: fadeUp 0.9s 0.55s forwards;
-    }
-
-    .hero-rule span {
-      display: block;
-      width: 60px;
-      height: 1px;
-      background: var(--dorado);
-    }
-
-    .hero-rule i {
-      font-style: normal;
-      color: var(--dorado);
-      font-size: 14px;
-    }
-
-    .hero p {
-      font-family: 'Playfair Display', serif;
-      font-size: clamp(18px, 3vw, 24px);
-      font-style: italic;
-      color: rgba(245,230,211,0.8);
-      margin-bottom: 48px;
-      opacity: 0;
-      animation: fadeUp 0.9s 0.65s forwards;
-    }
-
-    .hero-cta {
-      opacity: 0;
-      animation: fadeUp 0.9s 0.8s forwards;
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      gap: 20px;
-      flex-wrap: wrap;
-    }
-
-    .cta-button {
-      display: inline-block;
-      padding: 16px 48px;
-      font-family: 'Lato', sans-serif;
-      font-size: 12px;
-      font-weight: 700;
-      letter-spacing: 3px;
-      text-transform: uppercase;
-      text-decoration: none;
-      color: var(--carbon);
-      background: var(--dorado);
-      border: 2px solid var(--dorado);
-      border-radius: 2px;
-      transition: all 0.3s;
-    }
-
-    .cta-button:hover {
-      background: transparent;
-      color: var(--dorado);
-    }
-
-    .cta-button.outline {
-      background: transparent;
-      color: var(--dorado);
-    }
-
-    .cta-button.outline:hover {
-      background: var(--dorado);
-      color: var(--carbon);
-    }
-
-    @keyframes fadeUp {
-      from { opacity: 0; transform: translateY(24px); }
-      to   { opacity: 1; transform: translateY(0); }
-    }
-
-
-    /* ─── Sobre Nosotros ─────────────────────────────── */
-    .about {
-      padding: 110px 0;
-      background: var(--crema);
-    }
-
-    .about-inner {
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 80px;
-      align-items: center;
-    }
-
-    .about-text .section-label,
-    .about-text .section-title {
-      text-align: left;
-    }
-
-    .about-text .divider {
-      margin: 20px 0 0;
-    }
-
-    .about-body {
-      margin-top: 32px;
-    }
-
-    .about-body p {
-      color: var(--gris);
-      font-size: 16px;
-      margin-bottom: 16px;
-      line-height: 1.85;
-    }
-
-    .about-visual {
-      position: relative;
-    }
-
-    .about-frame {
-      background-image: url('imagenes/Ariel%20G.PNG');
-      background-position: center;
-      background-size: cover;
-      background-repeat: no-repeat;
-      border-radius: 4px;
-      padding: 60px 40px;
-      text-align: center;
-      box-shadow: 0 30px 80px rgba(168,25,46,0.3);
-      position: relative;
-      overflow: hidden;
-      display: flex;
-      flex-direction: column;
-      justify-content: center;
-      align-items: center;
-      min-height: 300px;
-    }
-
-    .about-frame::before {
-      content: '';
-      position: absolute;
-      top: -50%;
-      right: -30%;
-      width: 300px;
-      height: 300px;
-      background: radial-gradient(circle, rgba(212,175,55,0.1), transparent 70%);
-      pointer-events: none;
-    }
-
-    .about-frame-icon {
-      display: none;
-    }
-
-    .about-frame h3 {
-      font-family: 'Playfair Display', serif;
-      font-size: 32px;
-      color: var(--blanco);
-      margin-bottom: 16px;
-      text-shadow: 0 2px 8px rgba(0,0,0,0.5);
-    }
-
-    .about-frame p {
-      font-size: 16px;
-      color: var(--blanco);
-      letter-spacing: 1px;
-      text-shadow: 0 1px 4px rgba(0,0,0,0.4);
-    }
-
-    .about-badge {
-      position: absolute;
-      bottom: -20px;
-      right: 30px;
-      background: var(--dorado);
-      color: var(--carbon);
-      padding: 12px 24px;
-      font-weight: 700;
-      font-size: 13px;
-      letter-spacing: 2px;
-      text-transform: uppercase;
-      border-radius: 2px;
-      box-shadow: 0 8px 24px rgba(212,175,55,0.4);
-    }
-
-    /* ─── Menú ───────────────────────────────────────── */
-    .menu {
-      padding: 110px 0;
-      background: var(--blanco);
-    }
-
-    .menu-header {
-      text-align: center;
-      margin-bottom: 70px;
-    }
-
-    .menu-header .section-title,
-    .menu-header .section-label {
-      display: block;
-      text-align: center;
-    }
-
-    .menu-header .divider {
-      margin: 20px auto 0;
-    }
-
-    .menu-grid {
-      display: grid;
-      grid-template-columns: repeat(3, 1fr);
-      gap: 32px;
-    }
-
-    .menu-card {
-      position: relative;
-      background: var(--crema);
-      border-radius: 4px;
-      overflow: hidden;
-      border: 1px solid rgba(168,25,46,0.08);
-      transition: transform 0.35s cubic-bezier(0.165, 0.84, 0.44, 1),
-                  box-shadow 0.35s cubic-bezier(0.165, 0.84, 0.44, 1);
-    }
-
-    .menu-card:hover {
-      transform: translateY(-12px);
-      box-shadow: 0 24px 60px rgba(168,25,46,0.18);
-    }
-
-    .card-top {
-      position: relative;
-      overflow: hidden;
-      height: 220px;
-    }
-
-    .card-top img {
-      width: 100%;
-      height: 100%;
-      object-fit: cover;
-      object-position: center;
-      display: block;
-      transition: transform 0.5s ease;
-    }
-
-    .menu-card:hover .card-top img {
-      transform: scale(1.07);
-    }
-
-    .card-top::after {
-      content: '';
-      position: absolute;
-      bottom: 0;
-      left: 0;
-      right: 0;
-      height: 60px;
-      background: linear-gradient(to bottom, transparent, var(--crema));
-    }
-
-    .card-body {
-      padding: 20px 20px 24px;
-      text-align: center;
-    }
-
-    .card-body h3 {
-      font-family: 'Playfair Display', serif;
-      font-size: 20px;
-      color: var(--rojo);
-      margin: 0;
-    }
-
-    .card-body p {
-      display: none;
-    }
-
-    .card-footer {
-      display: none;
-    }
-
-    .price {
-      display: none;
-    }
-
-    .price-label {
-      display: none;
-    }
-
-    .card-tag {
-      display: none;
-    }
-
-    /* ─── Equipo ─────────────────────────────────────── */
-    .team {
-      padding: 110px 0;
-      background: var(--crema);
-    }
-
-    .team-header {
-      text-align: center;
-      margin-bottom: 70px;
-    }
-
-    .team-header .section-title,
-    .team-header .section-label {
-      display: block;
-      text-align: center;
-    }
-
-    .team-header .divider {
-      margin: 20px auto 0;
-    }
-
-    .team-grid {
-      display: grid;
-      grid-template-columns: repeat(5, 1fr);
-      gap: 32px;
-    }
-
-    .team-card {
-      position: relative;
-      text-align: center;
-      background: var(--blanco);
-      border-radius: 8px;
-      overflow: hidden;
-      transition: transform 0.35s cubic-bezier(0.165, 0.84, 0.44, 1),
-                  box-shadow 0.35s cubic-bezier(0.165, 0.84, 0.44, 1);
-      box-shadow: 0 4px 12px rgba(168,25,46,0.08);
-      border: 1px solid rgba(168,25,46,0.05);
-    }
-
-    .team-card:hover {
-      transform: translateY(-8px);
-      box-shadow: 0 16px 40px rgba(168,25,46,0.15);
-    }
-
-    .team-image {
-      position: relative;
-      overflow: hidden;
-      height: 240px;
-      width: 100%;
-    }
-
-    .team-image img {
-      width: 100%;
-      height: 100%;
-      object-fit: cover;
-      object-position: center;
-      display: block;
-      transition: transform 0.5s ease;
-    }
-
-    .team-card:hover .team-image img {
-      transform: scale(1.06);
-    }
-
-    .team-info {
-      padding: 24px 20px;
-    }
-
-    .team-info h3 {
-      font-family: 'Playfair Display', serif;
-      font-size: 18px;
-      color: var(--rojo);
-      margin: 0;
-      letter-spacing: 0.5px;
-    }
-
-    /* ─── Platos Lista ───────────────────────────────── */
-    .platos-lista {
-      list-style: none;
-      margin-top: 48px;
-      max-width: 600px;
-      margin-left: auto;
-      margin-right: auto;
-    }
-
-    .platos-lista li {
-      font-family: 'Playfair Display', serif;
-      font-size: clamp(20px, 3vw, 28px);
-      color: var(--carbon);
-      text-align: center;
-      padding: 20px 0;
-      border-bottom: 1px solid rgba(168,25,46,0.12);
-      letter-spacing: 1px;
-      transition: color 0.25s;
-    }
-
-    .platos-lista li:first-child {
-      border-top: 1px solid rgba(168,25,46,0.12);
-    }
-
-    .platos-lista li:hover {
-      color: var(--rojo);
-    }
-
-    /* ─── Reserva CTA ────────────────────────────────── */
-    .reserva-cta {
-      padding: 90px 0;
-      background: linear-gradient(135deg, var(--carbon) 0%, #2a1a1a 100%);
-      text-align: center;
-      position: relative;
-      overflow: hidden;
-    }
-
-    .reserva-cta::before {
-      content: '';
-      position: absolute;
-      inset: 0;
-      background: radial-gradient(ellipse 70% 60% at 50% 50%, rgba(168,25,46,0.3), transparent 70%);
-    }
-
-    .reserva-cta .section-label {
-      position: relative;
-    }
-
-    .reserva-cta .section-title {
-      color: var(--crema);
-      position: relative;
-      margin: 0 auto;
-    }
-
-    .reserva-cta p {
-      color: rgba(245,230,211,0.6);
-      font-size: 16px;
-      margin: 20px auto 40px;
-      max-width: 480px;
-      position: relative;
-    }
-
-    .reserva-cta .cta-button {
-      position: relative;
-    }
-
-    /* ─── Contacto ───────────────────────────────────── */
-    .contact {
-      padding: 110px 0;
-      background: linear-gradient(160deg, var(--rojo) 0%, var(--rojo-oscuro) 100%);
-      position: relative;
-      overflow: hidden;
-    }
-
-    .contact::before {
-      content: '';
-      position: absolute;
-      inset: 0;
-      background-image:
-        radial-gradient(circle at 10% 10%, rgba(212,175,55,0.07) 0%, transparent 40%),
-        radial-gradient(circle at 90% 90%, rgba(212,175,55,0.07) 0%, transparent 40%);
-    }
-
-    .contact-header {
-      text-align: center;
-      margin-bottom: 70px;
-      position: relative;
-    }
-
-    .contact-header .section-label {
-      color: rgba(212,175,55,0.7);
-    }
-
-    .contact-header .section-title {
-      color: var(--crema);
-    }
-
-    .contact-header .divider {
-      background: var(--dorado);
-    }
-
-    .contact-grid {
-      display: grid;
-      grid-template-columns: repeat(3, 1fr);
-      gap: 28px;
-      position: relative;
-    }
-
-    .info-card {
-      background: rgba(245,230,211,0.07);
-      border: 1px solid rgba(212,175,55,0.25);
-      border-radius: 4px;
-      padding: 40px 32px;
-      text-align: center;
-      backdrop-filter: blur(4px);
-      transition: background 0.3s, border-color 0.3s;
-    }
-
-    .info-card:hover {
-      background: rgba(245,230,211,0.12);
-      border-color: rgba(212,175,55,0.5);
-    }
-
-    .info-icon {
-      font-size: 36px;
-      margin-bottom: 18px;
-      display: block;
-    }
-
-    .info-card h3 {
-      font-family: 'Playfair Display', serif;
-      font-size: 18px;
-      color: var(--dorado);
-      margin-bottom: 14px;
-      letter-spacing: 1px;
-    }
-
-    .info-card p {
-      color: rgba(245,230,211,0.8);
-      font-size: 15px;
-      line-height: 1.8;
-    }
-
-    /* ─── Footer ─────────────────────────────────────── */
-    footer {
-      background: var(--carbon);
-      padding: 32px 0;
-      border-top: 1px solid rgba(212,175,55,0.2);
-    }
-
-    .footer-inner {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-    }
-
-    .footer-logo img {
-      height: 48px;
-      width: auto;
-      mix-blend-mode: screen;
-      filter: brightness(0.85);
-    }
-
-    .footer-copy {
-      font-size: 12px;
-      color: rgba(212,175,55,0.5);
-      letter-spacing: 1px;
-    }
-
-    .footer-social {
-      display: flex;
-      gap: 16px;
-    }
-
-    .footer-social a {
-      width: 36px;
-      height: 36px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      border: 1px solid rgba(212,175,55,0.25);
-      border-radius: 50%;
-      color: rgba(212,175,55,0.6);
-      text-decoration: none;
-      font-size: 14px;
-      transition: all 0.3s;
-    }
-
-    .footer-social a:hover {
-      border-color: var(--dorado);
-      color: var(--dorado);
-      background: rgba(212,175,55,0.1);
-    }
-
-    /* ─── Scroll reveal ──────────────────────────────── */
-    .reveal {
-      opacity: 0;
-      transform: translateY(30px);
-      transition: opacity 0.7s, transform 0.7s;
-    }
-
-    .reveal.visible {
-      opacity: 1;
-      transform: translateY(0);
-    }
-
-    /* ─── Responsive ─────────────────────────────────── */
-    @media (max-width: 1200px) {
-      .team-grid {
-        grid-template-columns: repeat(3, 1fr);
-      }
-    }
-
-    @media (max-width: 900px) {
-      .about-inner,
-      .menu-grid,
-      .contact-grid,
-      .team-grid {
-        grid-template-columns: 1fr;
-      }
-
-      .footer-inner {
-        flex-direction: column;
-        gap: 16px;
-        text-align: center;
-      }
-
-      nav ul {
-        gap: 18px;
-      }
-
-      .team-grid {
-        grid-template-columns: repeat(2, 1fr);
-      }
-    }
-
-    @media (max-width: 600px) {
-      .hero-logo img {
-        width: min(280px, 80vw);
-      }
-
-      nav ul {
-        display: none;
-      }
-
-      .about-badge {
-        position: static;
-        display: inline-block;
-        margin-top: 24px;
-      }
-    }
-  </style>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Cuidamos — Prototipo interactivo</title>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet" />
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@2/dist/tabler-icons.min.css" />
+<style>
+  :root {
+    --surface-1: #EEEEEF;
+    --border: #D6D6D6;
+    --text-secondary: #50506A;
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    padding: 2rem 1rem;
+    background: #F7F7F7;
+    font-family: 'Plus Jakarta Sans', sans-serif;
+    display: flex;
+    justify-content: center;
+  }
+  .sr-only {
+    position: absolute;
+    width: 1px; height: 1px;
+    padding: 0; margin: -1px;
+    overflow: hidden;
+    clip: rect(0,0,0,0);
+    white-space: nowrap;
+    border: 0;
+  }
+</style>
+<style>
+@keyframes dotPulse { 0%,80%,100%{opacity:.3} 40%{opacity:1} }
+.typing-dot{width:6px;height:6px;border-radius:50%;background:#8E8EA8;display:inline-block;margin:0 2px;animation:dotPulse 1.2s infinite;}
+.typing-dot:nth-child(2){animation-delay:.2s;}
+.typing-dot:nth-child(3){animation-delay:.4s;}
+.mv-navbtn{display:flex;flex-direction:column;align-items:center;gap:2px;font-size:10px;}
+#send-btn.active{background:#3F6455;cursor:pointer;}
+.cta-link{color:#0961DD;text-decoration:underline;cursor:pointer;font-weight:500;}
+#modal-sheet input, #modal-sheet select, #wa-body textarea{font-family:inherit;}
+</style>
 </head>
 <body>
-
-  <!-- ─── Header ─── -->
-  <header>
-    <div class="container header-inner">
-      <div class="logo">
-        <img src="logo.png" alt="Sangre Azul">
-      </div>
-      <nav>
-        <ul>
-          <li><a href="#sobre">Nosotros</a></li>
-          <li><a href="#menu">Menú</a></li>
-          <li><a href="#equipo">Equipo</a></li>
-          <li><a href="#contacto">Contacto</a></li>
-        </ul>
-      </nav>
-      <a href="#contacto" class="cta-button" style="padding:10px 24px;font-size:11px;">Reservar</a>
-    </div>
-  </header>
-
-  <!-- ─── Hero ─── -->
-  <section class="hero">
-    <div class="hero-bg"></div>
-    <div class="hero-content container">
-      <span class="hero-eyebrow">Restaurante Gourmet · Azul, Buenos Aires</span>
-      <div class="hero-logo">
-        <img src="logo.png" alt="Sangre Azul">
-      </div>
-      <div class="hero-rule">
-        <span></span>
-        <i>✦</i>
-        <span></span>
-      </div>
-      <p>Fuego, vino y cocina con alma</p>
-      <div class="hero-cta">
-        <a href="#menu" class="cta-button outline">Ver Menú</a>
-        <a href="#contacto" class="cta-button">Reservar Ahora</a>
-      </div>
-    </div>
-  </section>
-
-
-  <!-- ─── Sobre Nosotros ─── -->
-  <section class="about" id="sobre">
-    <div class="container about-inner">
-      <div class="about-text reveal">
-        <span class="section-label">Quiénes somos</span>
-        <h2 class="section-title">Una experiencia<br>que no se olvida</h2>
-        <div class="divider"></div>
-        <div class="about-body">
-          <p>En Sangre Azul, ofrecemos una experiencia culinaria única que combina la tradición argentina con técnicas modernas de cocina. Cada visita es un viaje a través de sabores auténticos y cuidadosamente elaborados.</p>
-          <p>Cada plato es una obra maestra creada con ingredientes frescos y seleccionados cuidadosamente para satisfacer los paladares más exigentes. La parrilla, el fuego y el vino son nuestra esencia.</p>
-          <p>Nuestro equipo de chefs expertos se dedica a brindar un servicio impecable en un ambiente elegante y cálido, donde cada detalle importa.</p>
+<h2 class="sr-only">Prototipo interactivo de la app Cuidamos en resolución 412x915: onboarding con Memo, navegación entre Inicio, Agenda, Familia y Ajustes, perfiles, detalle de Evento y Tarea, Historial, y el flujo Compartir cita/tarea con Stepper de 4 pasos.</h2>
+<div style="background:var(--surface-1);border-radius:16px;padding:1.5rem;">
+  <div style="display:flex;justify-content:flex-end;margin-bottom:10px;">
+    <button id="reset-btn" style="background:none;border:none;display:flex;align-items:center;gap:4px;color:var(--text-secondary);font-size:12px;cursor:pointer;padding:4px 8px;">
+      <i class="ti ti-refresh" style="font-size:14px;" aria-hidden="true"></i>Reiniciar demo
+    </button>
+  </div>
+  <div style="display:flex;justify-content:center;">
+    <div style="width:412px;height:915px;background:#FFFFFF;border-radius:28px;border:0.5px solid var(--border);overflow:hidden;display:flex;flex-direction:column;position:relative;">
+      <div id="status-bar" style="flex-shrink:0;background:#3F6455;display:flex;justify-content:space-between;align-items:center;padding:8px 20px 4px;color:#FFFFFF;font-size:12px;font-weight:500;">
+        <span>10:41</span>
+        <div style="display:flex;gap:5px;align-items:center;">
+          <i class="ti ti-antenna-bars-5" style="font-size:14px;" aria-hidden="true"></i>
+          <i class="ti ti-wifi" style="font-size:14px;" aria-hidden="true"></i>
+          <i class="ti ti-battery-4" style="font-size:14px;" aria-hidden="true"></i>
         </div>
       </div>
-      <div class="about-visual reveal" style="transition-delay:0.15s">
-        <div class="about-frame">
-          <h3>Cocina con Alma</h3>
-          <p>Tradición argentina · Técnica moderna</p>
+      <div id="wa-header" style="flex-shrink:0;background:#3F6455;display:flex;align-items:center;gap:12px;padding:10px 16px 16px;">
+        <i class="ti ti-arrow-left" style="color:#FFFFFF;font-size:20px;" aria-hidden="true"></i>
+        <div style="width:38px;height:38px;border-radius:50%;background:#EFECF8;display:flex;align-items:center;justify-content:center;font-weight:500;font-size:14px;color:#3F6455;flex-shrink:0;">M</div>
+        <div style="flex:1;min-width:0;">
+          <div style="color:#FFFFFF;font-size:15px;font-weight:500;">Memo</div>
+          <div style="color:#E6F2ED;font-size:12px;">en línea</div>
         </div>
-        <div class="about-badge">Desde 2009</div>
+        <i class="ti ti-video" style="color:#FFFFFF;font-size:19px;" aria-hidden="true"></i>
+        <i class="ti ti-phone" style="color:#FFFFFF;font-size:18px;margin-left:12px;" aria-hidden="true"></i>
+      </div>
+      <div id="wa-body" style="flex:1;min-height:0;overflow-y:auto;background:#E5DDD5;padding:14px;display:flex;flex-direction:column;gap:9px;"></div>
+      <div id="flow-footer" style="flex-shrink:0;display:none;gap:10px;background:#FFFFFF;border-top:0.5px solid #EEEEEF;padding:14px 16px;"></div>
+      <div id="wa-inputbar" style="flex-shrink:0;background:#F7F7F7;padding:10px 12px;display:flex;align-items:flex-end;gap:8px;border-top:0.5px solid #EEEEEF;">
+        <div style="flex:1;display:flex;align-items:flex-start;gap:8px;background:#FFFFFF;border-radius:18px;padding:9px 14px;min-width:0;">
+          <i class="ti ti-mood-smile" style="color:#8E8EA8;font-size:19px;flex-shrink:0;margin-top:1px;" aria-hidden="true"></i>
+          <span id="composer-text" style="color:#AAAAC6;font-size:14px;line-height:1.4;word-break:break-word;">Escribí un mensaje</span>
+        </div>
+        <div id="send-btn" style="width:36px;height:36px;border-radius:50%;background:#3F6455;display:flex;align-items:center;justify-content:center;flex-shrink:0;">
+          <i class="ti ti-microphone" id="send-icon" style="color:#FFFFFF;font-size:17px;" aria-hidden="true"></i>
+        </div>
+      </div>
+      <div id="app-navbar" style="flex-shrink:0;display:none;justify-content:space-between;align-items:center;background:#FFFFFF;border-top:0.5px solid #EEEEEF;padding:10px 24px 16px;"></div>
+      <div id="share-fab" style="display:none;position:absolute;right:20px;bottom:88px;width:52px;height:52px;border-radius:50%;background:#7B6FAD;align-items:center;justify-content:center;z-index:4;cursor:pointer;" aria-label="Compartir">
+        <i class="ti ti-share-3" style="color:#FFFFFF;font-size:20px;" aria-hidden="true"></i>
+      </div>
+      <div id="modal-overlay" style="display:none;position:absolute;top:0;left:0;right:0;bottom:0;background:rgba(48,48,66,0.45);align-items:flex-end;z-index:5;">
+        <div id="modal-sheet" style="width:100%;box-sizing:border-box;background:#FFFFFF;border-radius:24px 24px 0 0;padding:20px;max-height:78%;overflow-y:auto;"></div>
       </div>
     </div>
-  </section>
+  </div>
+  <div id="hint" style="text-align:center;font-size:11px;color:var(--text-secondary);margin-top:8px;">El mensaje aparece escrito abajo, tocá enviar (➤) para continuar</div>
+</div>
+<script>
+(function(){
+  var wabody = document.getElementById('wa-body');
+  var waheader = document.getElementById('wa-header');
+  var statusbar = document.getElementById('status-bar');
+  var inputbar = document.getElementById('wa-inputbar');
+  var appnavbar = document.getElementById('app-navbar');
+  var shareFab = document.getElementById('share-fab');
+  var flowFooter = document.getElementById('flow-footer');
+  var composerText = document.getElementById('composer-text');
+  var sendBtn = document.getElementById('send-btn');
+  var sendIcon = document.getElementById('send-icon');
+  var modalOverlay = document.getElementById('modal-overlay');
+  var modalSheet = document.getElementById('modal-sheet');
+  var minute = 41;
+  var pendingRun = null;
+  var formState = {};
+  var tareaFormState = {addingNote:false, noteText:''};
+  var historyState = {filter:'todos', order:'reciente'};
+  var shareFlow = {step:1, kind:'', itemId:'', caregiverIdx:null, selected:{}, backFn:null};
+  var CARD_BORDER = '1px solid #D6D6D6';
 
-  <!-- ─── Menú ─── -->
-  <section class="menu" id="menu">
-    <div class="container">
-      <div class="menu-header reveal">
-        <h2 class="section-title">Platos Destacados</h2>
-      </div>
-      <div class="menu-grid reveal">
-        <div class="menu-card">
-          <div class="card-top">
-            <img src="imagenes/1.PNG" alt="Bife de Chorizo">
-          </div>
-          <div class="card-body">
-            <h3>Bife de Chorizo</h3>
-          </div>
-        </div>
+  function hideFlowExtras(){
+    shareFab.style.display = 'none';
+    flowFooter.style.display = 'none';
+  }
 
-        <div class="menu-card">
-          <div class="card-top">
-            <img src="imagenes/2.PNG" alt="Salmón a la Mantequilla">
-          </div>
-          <div class="card-body">
-            <h3>Salmón a la Mantequilla</h3>
-          </div>
-        </div>
+  var appState = {
+    familiaTab: 'pacientes',
+    agendaFilter: 'todo',
+    notifs: {citas:true, tareas:true, compartidos:false, solicitudes:true}
+  };
 
-        <div class="menu-card">
-          <div class="card-top">
-            <img src="imagenes/3.PNG" alt="Cordero al Vino Tinto">
-          </div>
-          <div class="card-body">
-            <h3>Cordero al Vino Tinto</h3>
-          </div>
-        </div>
-      </div>
-    </div>
-  </section>
+  function getDefaultEventos(){
+    return [
+      {id:'ev-turno-lopez', title:'Turno con Dra. López', subtitleShort:'Ana García · viernes · 10:00',
+       paciente:'Ana García', vinculo:'Mamá', medico:'Dra. López', centro:'Clínica San Martín',
+       fechaLarga:'Viernes 12 de julio · 10:00', ubicacion:'Av. Santa Fe 2450, CABA', especialidad:'Cardiología',
+       checklist:[{text:'Llevar estudios previos', done:false},{text:'Ayuno de 8 horas', done:false}], notas:[], documentos:[]},
+      {id:'ev-estudios-sangre', title:'Revisión de estudios de sangre', subtitleShort:'Ana García · 01 jul · 10:00',
+       paciente:'Ana García', vinculo:'Mamá', medico:'Dr. Fernández', centro:'Laboratorio Central',
+       fechaLarga:'01 de julio · 10:00', ubicacion:'Av. Corrientes 1234, CABA', especialidad:'Clínica médica',
+       checklist:[{text:'Llevar orden médica', done:true}], notas:['Síntoma nuevo: cansancio leve'], documentos:['estudios_sangre_ana.pdf']},
+      {id:'ev-dentista-lucas', title:'Dentista Lucas', subtitleShort:'Lucas García · 12 jun · 16:00',
+       paciente:'Lucas García', vinculo:'Hijo', medico:'Dr. Paz', centro:'Consultorio Sonrisas',
+       fechaLarga:'12 de junio · 16:00', ubicacion:'Av. Cabildo 850, CABA', especialidad:'Odontología',
+       checklist:[], notas:[], documentos:[]},
+      {id:'ev-analitica-sangre', title:'Analítica de sangre', subtitleShort:'Ana García · 15 jun · 08:00',
+       paciente:'Ana García', vinculo:'Mamá', medico:'Dr. Fernández', centro:'Laboratorio Central',
+       fechaLarga:'15 de junio · 08:00', ubicacion:'Av. Corrientes 1234, CABA', especialidad:'Clínica médica',
+       checklist:[{text:'Ayuno de 8 horas', done:false}], notas:[], documentos:[]},
+      {id:'ev-pediatra-sofia', title:'Revisión pediatra Sofía', subtitleShort:'Sofía García · 20 jun · 11:00',
+       paciente:'Sofía García', vinculo:'Hija', medico:'Dra. Ibáñez', centro:'Pediatría Norte',
+       fechaLarga:'20 de junio · 11:00', ubicacion:'Av. Libertador 3200, CABA', especialidad:'Pediatría',
+       checklist:[], notas:[], documentos:[]}
+    ];
+  }
+  function getDefaultTareas(){
+    return [
+      {id:'ta-seguro', title:'Renovar seguro médico familiar', subtitleShort:'Ana García · vence 9 jun',
+       paciente:'Ana García', acompanante:'Roberto García',
+       detalle:'Renovar la póliza de la obra social antes del vencimiento y guardar el comprobante.',
+       vencimiento:'domingo, 9 de junio', especialidad:'Administrativo', notas:[], archivos:[]},
+      {id:'ta-tension', title:'Seguimiento tensión semanal', subtitleShort:'Ana García · vence 9 jun',
+       paciente:'Ana García', acompanante:'Roberto García',
+       detalle:'Tomar la tensión a mamá cada lunes por la mañana y anotar los valores.',
+       vencimiento:'martes, 9 de junio', especialidad:'Cardiología', notas:['Última lectura: 130/85'], archivos:[]}
+    ];
+  }
+  var EVENTOS = getDefaultEventos();
+  var TAREAS = getDefaultTareas();
+  function findEvento(id){ return EVENTOS.filter(function(e){ return e.id === id; })[0]; }
+  function findTarea(id){ return TAREAS.filter(function(t){ return t.id === id; })[0]; }
 
-  <!-- ─── Reserva CTA (Post-Menu) ─── -->
-  <section class="reserva-cta">
-    <div class="container">
-      <a href="#contacto" class="cta-button reveal">Reserva Ahora</a>
-    </div>
-  </section>
+  function getDefaultPatients(){
+    return [
+      {initials:'AG', name:'Ana García', age:'68 años', links:['Agustina G.','Roberto G.'],
+       vinculo:'Mamá', phone:'+54 9 11 4455-6677', tags:['Hipertensión','Diabetes tipo 2'],
+       created:'Creado el 12 mar 2024', itemIds:['ev-turno-lopez','ev-estudios-sangre','ta-seguro']},
+      {initials:'LG', name:'Lucas García', age:'9 años', links:[],
+       vinculo:'Hijo', phone:'+54 9 11 2233-4455', tags:[],
+       created:'Creado el 3 may 2024', itemIds:['ev-dentista-lucas']}
+    ];
+  }
+  function getDefaultCaregivers(){
+    return [
+      {initials:'AG', name:'Agustina García', age:'42 años', links:['Ana G.'],
+       vinculo:'Hija', phone:'+54 9 11 5566-7788', patientsLinked:['Ana García'],
+       permisos:{citas:true, tareas:true, documentos:false, notas:true}},
+      {initials:'RG', name:'Roberto García', age:'45 años', links:['Ana G.'],
+       vinculo:'Hijo', phone:'+54 9 11 6677-8899', patientsLinked:['Ana García'],
+       permisos:{citas:true, tareas:false, documentos:true, notas:false}}
+    ];
+  }
+  var patients = getDefaultPatients();
+  var caregivers = getDefaultCaregivers();
 
-  <!-- ─── Equipo ─── -->
-  <section class="team" id="equipo">
-    <div class="container">
-      <div class="team-header reveal">
-        <span class="section-label">Nuestro Equipo</span>
-        <h2 class="section-title">Los rostros detrás del fuego</h2>
-        <div class="divider"></div>
-      </div>
-      <div class="team-grid reveal">
-        <div class="team-card">
-          <div class="team-image">
-            <img src="imagenes/p1.png" alt="Chef Principal">
-          </div>
-          <div class="team-info">
-            <h3>Chef Principal</h3>
-          </div>
-        </div>
+  var HISTORIAL = [
+    {date:'Hoy', hora:'10:44', desc:'Memo creó el evento "Turno con Dra. López"', estado:'Actualización', quien:'Memo · WhatsApp', donde:'Familia García', category:'familia'},
+    {date:'Hoy', hora:'09:12', desc:'Se marcó "Llevar orden médica" en Revisión de estudios de sangre', estado:'Completado', quien:'Mónica Bozzarello', donde:'Perfil de Ana García', category:'pacientes'},
+    {date:'Ayer', hora:'18:30', desc:'Se compartió "Revisión de estudios de sangre" con Roberto García', estado:'Compartido', quien:'Mónica Bozzarello', donde:'WhatsApp', category:'familia'},
+    {date:'Ayer', hora:'14:05', desc:'Se adjuntó el archivo estudios_sangre_ana.pdf', estado:'Actualización', quien:'Agustina García', donde:'Perfil de Ana García', category:'archivos'},
+    {date:'Hace 2 días', hora:'11:00', desc:'Se creó la tarea "Renovar seguro médico familiar"', estado:'Actualización', quien:'Roberto García', donde:'Agenda', category:'tareas'},
+    {date:'Hace 2 días', hora:'08:40', desc:'Se agregó una nota en "Seguimiento tensión semanal"', estado:'Nota', quien:'Mónica Bozzarello', donde:'Tarea', category:'tareas'}
+  ];
 
-        <div class="team-card">
-          <div class="team-image">
-            <img src="imagenes/p2.png" alt="Sous Chef">
-          </div>
-          <div class="team-info">
-            <h3>Sous Chef</h3>
-          </div>
-        </div>
+  function nextTime(){
+    var t = '10:' + (minute < 10 ? '0' + minute : minute);
+    if (Math.random() > 0.5) minute++;
+    return t;
+  }
 
-        <div class="team-card">
-          <div class="team-image">
-            <img src="imagenes/p3.png" alt="Chef Pastelero">
-          </div>
-          <div class="team-info">
-            <h3>Chef Pastelero</h3>
-          </div>
-        </div>
+  function metaRow(isUser){
+    var time = nextTime();
+    var ticks = isUser ? '<i class="ti ti-checks" style="color:#53BDEB;font-size:13px;vertical-align:-2px;margin-left:3px;" aria-hidden="true"></i>' : '';
+    return '<div style="text-align:right;margin-top:2px;">' +
+      '<span style="font-size:10px;color:#667781;">' + time + '</span>' + ticks +
+    '</div>';
+  }
 
-        <div class="team-card">
-          <div class="team-image">
-            <img src="imagenes/p4.png" alt="Chef Parrillero">
-          </div>
-          <div class="team-info">
-            <h3>Chef Parrillero</h3>
-          </div>
-        </div>
+  function botBubble(html){
+    var row = document.createElement('div');
+    row.style.cssText = 'display:flex;justify-content:flex-start;';
+    var b = document.createElement('div');
+    b.style.cssText = 'background:#FFFFFF;border-radius:8px;border-top-left-radius:2px;padding:9px 12px;max-width:82%;font-size:14px;line-height:1.5;color:#303042;';
+    b.innerHTML = html + metaRow(false);
+    row.appendChild(b);
+    wabody.appendChild(row);
+    wabody.scrollTop = wabody.scrollHeight;
+    return b;
+  }
 
-        <div class="team-card">
-          <div class="team-image">
-            <img src="imagenes/p5.png" alt="Sommelier">
-          </div>
-          <div class="team-info">
-            <h3>Sommelier</h3>
-          </div>
-        </div>
-      </div>
-    </div>
-  </section>
+  function userBubble(text){
+    var row = document.createElement('div');
+    row.style.cssText = 'display:flex;justify-content:flex-end;';
+    var b = document.createElement('div');
+    b.style.cssText = 'background:#D9FDD3;border-radius:8px;border-top-right-radius:2px;padding:9px 12px;max-width:82%;font-size:14px;line-height:1.5;color:#303042;';
+    var t = document.createElement('div');
+    t.textContent = text;
+    b.appendChild(t);
+    var meta = document.createElement('div');
+    meta.innerHTML = metaRow(true);
+    b.appendChild(meta);
+    row.appendChild(b);
+    wabody.appendChild(row);
+    wabody.scrollTop = wabody.scrollHeight;
+  }
 
-  <!-- ─── Reserva CTA ─── -->
-  <section class="reserva-cta">
-    <div class="container">
-      <span class="section-label">Reservas</span>
-      <h2 class="section-title reveal">¿Listo para una velada inolvidable?</h2>
-      <p class="reveal" style="transition-delay:0.1s">Reservá tu mesa y dejate llevar por los sabores de Sangre Azul.</p>
-      <a href="#contacto" class="cta-button reveal" style="transition-delay:0.2s">Hacer una Reserva</a>
-    </div>
-  </section>
+  function typingThen(cb, delay){
+    var row = document.createElement('div');
+    row.style.cssText = 'display:flex;justify-content:flex-start;';
+    var b = document.createElement('div');
+    b.style.cssText = 'background:#FFFFFF;border-radius:8px;border-top-left-radius:2px;padding:11px 15px;';
+    b.innerHTML = '<span class="typing-dot"></span><span class="typing-dot"></span><span class="typing-dot"></span>';
+    row.appendChild(b);
+    wabody.appendChild(row);
+    wabody.scrollTop = wabody.scrollHeight;
+    setTimeout(function(){
+      row.remove();
+      cb();
+    }, delay || 900);
+  }
 
-  <!-- ─── Contacto ─── -->
-  <section class="contact" id="contacto">
-    <div class="container">
-      <div class="contact-header">
-        <span class="section-label">Encontranos</span>
-        <h2 class="section-title">Contacto</h2>
-        <div class="divider"></div>
-      </div>
-      <div class="contact-grid">
+  function userTurn(text, thenFn, delay){
+    return function(){
+      userBubble(text);
+      typingThen(thenFn, delay || 1000);
+    };
+  }
 
-        <div class="info-card reveal">
-          <span class="info-icon">📍</span>
-          <h3>Ubicación</h3>
-          <p>Belgrano 128<br>Azul, Buenos Aires<br>Argentina</p>
-        </div>
+  function setComposer(text, run){
+    composerText.textContent = text;
+    composerText.style.color = '#303042';
+    pendingRun = run;
+    sendIcon.className = 'ti ti-send';
+    sendBtn.classList.add('active');
+  }
 
-        <div class="info-card reveal" style="transition-delay:0.1s">
-          <span class="info-icon">📞</span>
-          <h3>Teléfono</h3>
-          <p>+54 (0236) 423-8000<br><br>
-            <a href="tel:+5402364238000" style="color:var(--dorado);text-decoration:none;">Llamar ahora</a>
-          </p>
-        </div>
+  function resetComposer(){
+    composerText.textContent = 'Escribí un mensaje';
+    composerText.style.color = '#AAAAC6';
+    pendingRun = null;
+    sendIcon.className = 'ti ti-microphone';
+    sendBtn.classList.remove('active');
+  }
 
-        <div class="info-card reveal" style="transition-delay:0.2s">
-          <span class="info-icon">⏰</span>
-          <h3>Horarios</h3>
-          <p>Lun–Vie: 19:00 – 23:00<br>Sábados: 12:00 – 00:00<br>Domingos: 12:00 – 23:00</p>
-        </div>
+  sendBtn.onclick = function(){
+    if (!pendingRun) return;
+    var run = pendingRun;
+    resetComposer();
+    run();
+  };
 
-      </div>
-    </div>
-  </section>
+  function openChat(){
+    typingThen(function(){
+      botBubble('¡Hola! Soy <strong>Memo</strong> 👋 Contame qué necesitás guardar o coordinar y yo te ayudo a organizarlo.');
+      setComposer('Memo, mamá tiene turno con la Dra. López el viernes a las 10 hs.',
+        userTurn('Memo, mamá tiene turno con la Dra. López el viernes a las 10 hs.', stepB, 1100));
+    }, 600);
+  }
 
-  <!-- ─── Footer ─── -->
-  <footer>
-    <div class="container footer-inner">
-      <div class="footer-logo">
-        <img src="logo.png" alt="Sangre Azul" style="mix-blend-mode:screen;">
-      </div>
-      <p class="footer-copy">&copy; 2024 Sangre Azul Restaurante. Todos los derechos reservados.</p>
-      <div class="footer-social">
-        <a href="#" title="Instagram">📷</a>
-        <a href="#" title="Facebook">👤</a>
-        <a href="#" title="WhatsApp">💬</a>
-      </div>
-    </div>
-  </footer>
+  function stepB(){
+    botBubble('¿Querés que cree un evento médico con la Dra. López el viernes a las 10 hs?');
+    setComposer('Sí, crear evento', userTurn('Sí, crear evento', stepF, 1000));
+  }
 
-  <!-- ─── Scroll Reveal ─── -->
-  <script>
-    const observer = new IntersectionObserver((entries) => {
-      entries.forEach(entry => {
-        if (entry.isIntersecting) {
-          entry.target.classList.add('visible');
-          observer.unobserve(entry.target);
-        }
-      });
-    }, { threshold: 0.12 });
+  function stepF(){
+    botBubble('Evento guardado 🎉. Lo vas a encontrar en la <strong>bandeja de entrada</strong> y en el perfil de Ana García.<br><br><span class="cta-link" id="cta-link">Continuar a la App →</span>');
+    resetComposer();
+    document.getElementById('cta-link').onclick = enterApp;
+  }
 
-    document.querySelectorAll('.reveal').forEach(el => observer.observe(el));
-  </script>
+  function cardHtml(title, subtitle, kind, id){
+    var iconBg = kind === 'task' ? '#E6F2ED' : '#EFECF8';
+    var iconColor = kind === 'task' ? '#5A8B78' : '#7B6FAD';
+    var icon = kind === 'task' ? 'ti-checkbox' : 'ti-calendar-event';
+    var tagBg = kind === 'task' ? '#E6F2ED' : '#EFECF8';
+    var tagColor = kind === 'task' ? '#5A8B78' : '#7B6FAD';
+    var tagLabel = kind === 'task' ? 'Tarea' : 'Cita';
+    var dataAttrs = id ? ' data-detail-id="' + id + '" data-detail-kind="' + kind + '"' : '';
+    return '<div' + dataAttrs + ' style="background:#FFFFFF;border:' + CARD_BORDER + ';border-radius:16px;padding:14px;display:flex;align-items:center;gap:12px;margin-bottom:10px;' + (id ? 'cursor:pointer;' : '') + '">' +
+      '<div style="width:36px;height:36px;border-radius:50%;background:' + iconBg + ';display:flex;align-items:center;justify-content:center;flex-shrink:0;"><i class="ti ' + icon + '" style="color:' + iconColor + ';font-size:18px;" aria-hidden="true"></i></div>' +
+      '<div style="flex:1;min-width:0;">' +
+        '<div style="font-size:14px;font-weight:500;color:#303042;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">' + title + '</div>' +
+        '<div style="font-size:12px;color:#8E8EA8;">' + subtitle + '</div>' +
+      '</div>' +
+      '<div style="font-size:11px;font-weight:600;color:' + tagColor + ';background:' + tagBg + ';padding:4px 12px;border-radius:50px;flex-shrink:0;">' + tagLabel + '</div>' +
+    '</div>';
+  }
 
+  function idCard(id, kind){
+    var d = kind === 'event' ? findEvento(id) : findTarea(id);
+    return cardHtml(d.title, d.subtitleShort, kind, id);
+  }
+
+  function openDetail(id, kind, backFn){
+    hideFlowExtras();
+    shareFab.style.display = 'flex';
+    if (kind === 'event') renderEventoDetail(id, backFn);
+    else { tareaFormState = {addingNote:false, noteText:''}; renderTareaDetail(id, backFn); }
+  }
+
+  function navBtn(icon, label, screenName, activeScreen){
+    var color = screenName === activeScreen ? '#7B6FAD' : '#8E8EA8';
+    return '<div class="mv-navbtn" data-screen="' + screenName + '" style="color:' + color + ';cursor:pointer;"><i class="ti ' + icon + '" style="font-size:20px;" aria-hidden="true"></i>' + label + '</div>';
+  }
+
+  function renderNavbar(active){
+    appnavbar.innerHTML =
+      navBtn('ti-home','Inicio','inicio',active) +
+      navBtn('ti-notebook','Agenda','agenda',active) +
+      navBtn('ti-users','Familia','familia',active) +
+      navBtn('ti-settings','Ajustes','ajustes',active);
+  }
+
+  function screenHeader(title, subtitle, rightHtml){
+    return '<div style="display:flex;align-items:center;justify-content:space-between;width:100%;">' +
+      '<div><div style="color:#303042;font-size:16px;font-weight:500;">' + title + '</div>' +
+      (subtitle ? '<div style="color:#8E8EA8;font-size:12px;">' + subtitle + '</div>' : '') + '</div>' +
+      (rightHtml || '') +
+    '</div>';
+  }
+
+  function sectionLabel(text){
+    return '<div style="font-size:11px;font-weight:600;letter-spacing:1px;color:#8E8EA8;text-transform:uppercase;margin-bottom:8px;">' + text + '</div>';
+  }
+
+  function fieldRow(html, isLast){
+    return '<div style="' + (isLast ? '' : 'border-bottom:0.5px solid #EEEEEF;padding-bottom:12px;margin-bottom:12px;') + '">' + html + '</div>';
+  }
+
+  function iconRow(icon, text){
+    return '<div style="display:flex;align-items:center;gap:8px;"><i class="ti ' + icon + '" style="color:#8E8EA8;font-size:15px;flex-shrink:0;" aria-hidden="true"></i><span style="font-size:13px;color:#303042;">' + text + '</span></div>';
+  }
+
+  function renderInicio(){
+    hideFlowExtras();
+    waheader.onclick = null;
+    waheader.innerHTML = screenHeader('Buenos días, Mónica', '8 de julio', '<i class="ti ti-bell" style="color:#8E8EA8;font-size:19px;" aria-hidden="true"></i>');
+    wabody.innerHTML =
+      '<div style="font-size:14px;font-weight:500;color:#303042;margin-bottom:2px;">Próximas (3)</div>' +
+      '<div style="font-size:12px;color:#50506A;margin-bottom:8px;">Eventos (2) · Tareas (1)</div>' +
+      idCard('ta-seguro','task') +
+      idCard('ev-dentista-lucas','event') +
+      idCard('ev-estudios-sangre','event') +
+      '<div style="font-size:14px;font-weight:500;color:#303042;margin:14px 0 2px;">Bandeja de entrada (1)</div>' +
+      '<div style="font-size:12px;color:#50506A;margin-bottom:8px;">Eventos (1)</div>' +
+      '<div style="position:relative;">' +
+        idCard('ev-turno-lopez','event') +
+        '<div style="position:absolute;top:10px;right:10px;background:#E6F2ED;color:#3F6455;font-size:11px;font-weight:600;letter-spacing:.4px;padding:3px 10px;border-radius:50px;">NUEVO</div>' +
+      '</div>';
+
+    wabody.onclick = function(e){
+      var det = e.target.closest('[data-detail-id]');
+      if (det){ openDetail(det.dataset.detailId, det.dataset.detailKind, function(){ renderScreen('inicio'); }); }
+    };
+  }
+
+  var agendaItemRefs = [
+    {id:'ev-turno-lopez', kind:'event'},
+    {id:'ta-tension', kind:'task'},
+    {id:'ev-estudios-sangre', kind:'event'},
+    {id:'ev-dentista-lucas', kind:'event'},
+    {id:'ev-analitica-sangre', kind:'event'},
+    {id:'ev-pediatra-sofia', kind:'event'}
+  ];
+
+  function filterTab(label, key){
+    var active = key === appState.agendaFilter;
+    var bg = active ? '#7B6FAD' : '#FFFFFF';
+    var color = active ? '#FFFFFF' : '#8E8EA8';
+    return '<button data-filter="' + key + '" style="background:' + bg + ';color:' + color + ';border:none;border-radius:50px;padding:8px 16px;font-size:13px;font-weight:500;margin-right:8px;cursor:pointer;">' + label + '</button>';
+  }
+
+  function renderAgenda(){
+    hideFlowExtras();
+    waheader.onclick = null;
+    waheader.innerHTML = screenHeader('Agenda', '8 de julio',
+      '<div style="display:flex;align-items:center;gap:6px;background:#FFFFFF;border:0.5px solid #AAAAC6;border-radius:50px;padding:6px 12px;">' +
+        '<i class="ti ti-arrows-sort" style="color:#7B6FAD;font-size:14px;" aria-hidden="true"></i>' +
+        '<span style="color:#7B6FAD;font-size:12px;font-weight:600;">Próximos</span>' +
+      '</div>');
+
+    var items = agendaItemRefs.filter(function(r){
+      if (appState.agendaFilter === 'todo') return true;
+      if (appState.agendaFilter === 'citas') return r.kind === 'event';
+      return r.kind === 'task';
+    }).map(function(r){ return idCard(r.id, r.kind); }).join('');
+
+    wabody.innerHTML =
+      '<div style="display:flex;gap:8px;margin-bottom:14px;">' +
+        '<div style="flex:1;display:flex;align-items:center;gap:8px;background:#EFECF8;border-radius:50px;padding:10px 14px;min-width:0;">' +
+          '<i class="ti ti-search" style="color:#8E8EA8;font-size:16px;flex-shrink:0;" aria-hidden="true"></i>' +
+          '<span style="color:#8E8EA8;font-size:13px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">Buscar citas, tareas, documentos…</span>' +
+        '</div>' +
+        '<div style="width:40px;height:40px;border-radius:50%;background:#FFFFFF;border:0.5px solid #EEEEEF;display:flex;align-items:center;justify-content:center;flex-shrink:0;"><i class="ti ti-adjustments-horizontal" style="color:#50506A;font-size:18px;" aria-hidden="true"></i></div>' +
+      '</div>' +
+      '<div style="margin-bottom:14px;">' + filterTab('Todo','todo') + filterTab('Citas','citas') + filterTab('Tareas','tareas') + '</div>' +
+      items;
+
+    wabody.onclick = function(e){
+      var det = e.target.closest('[data-detail-id]');
+      if (det){ openDetail(det.dataset.detailId, det.dataset.detailKind, function(){ renderScreen('agenda'); }); return; }
+      var el = e.target.closest('[data-filter]');
+      if (!el) return;
+      appState.agendaFilter = el.dataset.filter;
+      renderAgenda();
+    };
+  }
+
+  function profileCard(p, kind, idx){
+    var bg = kind === 'patient' ? '#EFECF8' : '#E6F2ED';
+    var color = kind === 'patient' ? '#7B6FAD' : '#5A8B78';
+    var linksHtml = p.links.map(function(l){
+      return '<span style="background:#E6F2ED;color:#5A8B78;font-size:11px;font-weight:600;padding:3px 10px;border-radius:50px;margin-right:6px;">' + l + '</span>';
+    }).join('');
+    var newBadge = p.isNew ? ' <span style="background:#E6F2ED;color:#3F6455;font-size:10px;font-weight:600;padding:2px 8px;border-radius:50px;vertical-align:middle;">NUEVO</span>' : '';
+    return '<div data-profile-kind="' + kind + '" data-profile-idx="' + idx + '" style="background:#FFFFFF;border:' + CARD_BORDER + ';border-radius:16px;padding:14px;display:flex;align-items:center;gap:12px;margin-bottom:10px;cursor:pointer;">' +
+      '<div style="width:40px;height:40px;border-radius:50%;background:' + bg + ';display:flex;align-items:center;justify-content:center;flex-shrink:0;font-weight:500;font-size:13px;color:' + color + ';">' + p.initials + '</div>' +
+      '<div style="flex:1;min-width:0;">' +
+        '<div style="font-size:14px;font-weight:500;color:#303042;">' + p.name + newBadge + '</div>' +
+        '<div style="font-size:12px;color:#8E8EA8;margin-bottom:4px;">' + p.age + '</div>' +
+        (linksHtml ? '<div>' + linksHtml + '</div>' : '') +
+      '</div>' +
+      '<i class="ti ti-chevron-right" style="color:#AAAAC6;font-size:16px;flex-shrink:0;" aria-hidden="true"></i>' +
+    '</div>';
+  }
+
+  function familiaTabBtn(label, key){
+    var active = key === appState.familiaTab;
+    var bg = active ? '#FFFFFF' : '#EFECF8';
+    var color = active ? '#7B6FAD' : '#8E8EA8';
+    var border = active ? '1px solid #7B6FAD' : 'none';
+    return '<button data-famtab="' + key + '" style="flex:1;background:' + bg + ';color:' + color + ';border:' + border + ';border-radius:50px;padding:10px;font-size:13px;font-weight:500;cursor:pointer;">' + label + '</button>';
+  }
+
+  function renderFamilia(){
+    hideFlowExtras();
+    waheader.onclick = null;
+    waheader.innerHTML = screenHeader('Familia', patients.length + ' pacientes · ' + caregivers.length + ' cuidadores');
+    wabody.innerHTML =
+      '<div style="display:flex;gap:6px;background:#EFECF8;border-radius:50px;padding:4px;margin-bottom:14px;">' +
+        familiaTabBtn('Pacientes','pacientes') + familiaTabBtn('Cuidadores','cuidadores') +
+      '</div>' +
+      (appState.familiaTab === 'pacientes'
+        ? patients.map(function(p,i){ return profileCard(p,'patient',i); }).join('')
+        : caregivers.map(function(p,i){ return profileCard(p,'caregiver',i); }).join('')) +
+      '<button data-newprofile="1" style="width:100%;background:none;border:1.5px dashed #C5BFE0;border-radius:16px;padding:14px;color:#50506A;font-size:14px;font-weight:500;margin-top:8px;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:8px;"><i class="ti ti-user-plus" style="font-size:18px;" aria-hidden="true"></i>Agregar nuevo perfil</button>';
+
+    wabody.onclick = function(e){
+      var tab = e.target.closest('[data-famtab]');
+      if (tab){ appState.familiaTab = tab.dataset.famtab; renderFamilia(); return; }
+      var card = e.target.closest('[data-profile-kind]');
+      if (card){
+        var idx = Number(card.dataset.profileIdx);
+        if (card.dataset.profileKind === 'patient') renderPatientProfile(idx);
+        else renderCaregiverProfile(idx);
+        return;
+      }
+      if (e.target.closest('[data-newprofile]')){ openAddProfileModal(); }
+    };
+  }
+
+  function detailHeader(avatarBg, avatarColor, initials, name, age, nameSize){
+    return '<div style="width:100%;">' +
+      '<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;">' +
+        '<i class="ti ti-arrow-left" data-back="1" style="color:#303042;font-size:20px;cursor:pointer;" aria-label="Volver"></i>' +
+        '<button style="background:#FFFFFF;border:0.5px solid #EEEEEF;border-radius:50px;padding:6px 14px;font-size:12px;font-weight:500;color:#50506A;display:flex;align-items:center;gap:6px;cursor:pointer;"><i class="ti ti-pencil" style="font-size:12px;" aria-hidden="true"></i>Editar</button>' +
+      '</div>' +
+      '<div style="display:flex;align-items:center;gap:12px;">' +
+        '<div style="width:48px;height:48px;border-radius:50%;background:' + avatarBg + ';display:flex;align-items:center;justify-content:center;font-weight:500;font-size:16px;color:' + avatarColor + ';flex-shrink:0;">' + initials + '</div>' +
+        '<div><div style="font-size:' + nameSize + 'px;font-weight:500;color:#303042;">' + name + '</div><div style="font-size:12px;color:#8E8EA8;">' + age + '</div></div>' +
+      '</div>' +
+    '</div>';
+  }
+
+  function renderPatientProfile(idx){
+    hideFlowExtras();
+    var p = patients[idx];
+    waheader.innerHTML = detailHeader('#E6F2ED', '#5A8B78', p.initials, p.name, p.age, 18);
+    waheader.onclick = function(e){ if (e.target.closest('[data-back]')){ renderFamilia(); renderNavbar('familia'); } };
+
+    var tagsHtml = p.tags.length
+      ? p.tags.map(function(t){ return '<span style="background:#EFECF8;color:#7B6FAD;font-size:11px;font-weight:600;padding:4px 12px;border-radius:50px;margin-right:6px;display:inline-block;margin-bottom:6px;">' + t + '</span>'; }).join('')
+      : '<span style="font-size:12px;color:#AAAAC6;">Sin etiquetas médicas.</span>';
+
+    var caregiversHtml = p.links.length
+      ? p.links.map(function(l, i){
+          var caregiverInitials = l.split(' ').map(function(w){ return w[0]; }).join('');
+          return '<div style="display:flex;align-items:center;gap:10px;padding:8px 0;' + (i < p.links.length - 1 ? 'border-bottom:0.5px solid #EEEEEF;' : '') + '">' +
+            '<div style="width:32px;height:32px;border-radius:50%;background:#E6F2ED;display:flex;align-items:center;justify-content:center;font-weight:500;font-size:12px;color:#5A8B78;flex-shrink:0;">' + caregiverInitials + '</div>' +
+            '<div style="flex:1;"><div style="font-size:13px;font-weight:500;color:#303042;">' + l + '</div><div style="font-size:11px;color:#8E8EA8;">Cuidador</div></div>' +
+          '</div>';
+        }).join('')
+      : '<div style="font-size:12px;color:#AAAAC6;padding:6px 0 10px;">Todavía no hay cuidadores asociados.</div>';
+
+    var itemsHtml = p.itemIds.map(function(id){
+      var ev = findEvento(id);
+      if (ev) return cardHtml(ev.title, ev.subtitleShort, 'event', id);
+      var ta = findTarea(id);
+      return cardHtml(ta.title, ta.subtitleShort, 'task', id);
+    }).join('');
+
+    wabody.innerHTML =
+      '<div style="background:#FFFFFF;border:' + CARD_BORDER + ';border-radius:16px;padding:16px;margin-bottom:6px;">' +
+        fieldRow('<div style="font-size:12px;color:#8E8EA8;">Vínculo: <span style="color:#303042;font-weight:500;">' + p.vinculo + '</span></div>') +
+        fieldRow(
+          '<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px;">' +
+            '<span style="font-size:11px;font-weight:600;color:#8E8EA8;text-transform:uppercase;letter-spacing:1px;">Etiquetas médicas</span>' +
+            '<i class="ti ti-pencil" style="color:#8E8EA8;font-size:14px;" aria-hidden="true"></i>' +
+          '</div>' +
+          '<div>' + tagsHtml + '</div>'
+        ) +
+        fieldRow(
+          '<div style="display:flex;align-items:center;gap:8px;background:#E6F2ED;border-radius:12px;padding:10px 12px;">' +
+            '<i class="ti ti-brand-whatsapp" style="color:#5A8B78;font-size:16px;" aria-hidden="true"></i>' +
+            '<span style="font-size:13px;color:#3F6455;font-weight:500;">' + p.phone + '</span>' +
+          '</div>', true
+        ) +
+      '</div>' +
+      '<div style="text-align:right;font-size:10px;color:#AAAAC6;margin-bottom:18px;">' + p.created + '</div>' +
+      sectionLabel('Cuidadores asociados') +
+      '<div style="background:#FFFFFF;border:' + CARD_BORDER + ';border-radius:16px;padding:12px 16px;margin-bottom:20px;">' +
+        caregiversHtml +
+        '<button data-open-add-profile="1" style="width:100%;background:none;border:1.5px dashed #C5BFE0;border-radius:12px;padding:10px;color:#7B6FAD;font-size:13px;font-weight:500;margin-top:6px;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:6px;"><i class="ti ti-user-plus" style="font-size:15px;" aria-hidden="true"></i>Nuevo acompañante</button>' +
+      '</div>' +
+      '<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px;">' +
+        '<span style="font-size:11px;font-weight:600;letter-spacing:1px;color:#8E8EA8;text-transform:uppercase;">Documentos y tareas</span>' +
+        '<span class="cta-link" data-goto-agenda="1" style="font-size:12px;">Ver todas</span>' +
+      '</div>' +
+      itemsHtml;
+
+    wabody.onclick = function(e){
+      var det = e.target.closest('[data-detail-id]');
+      if (det){ openDetail(det.dataset.detailId, det.dataset.detailKind, function(){ renderPatientProfile(idx); renderNavbar('familia'); }); return; }
+      if (e.target.closest('[data-open-add-profile]')){ openAddProfileModal(); return; }
+      if (e.target.closest('[data-goto-agenda]')){ renderScreen('agenda'); }
+    };
+  }
+
+  function permToggle(obj, key, label, isLast){
+    var on = obj[key];
+    var thumbLeft = on ? '20px' : '2px';
+    var bg = on ? '#7B6FAD' : '#C5BFE0';
+    return '<div style="display:flex;align-items:center;justify-content:space-between;padding:12px 0;' + (isLast ? '' : 'border-bottom:0.5px solid #EEEEEF;') + '">' +
+      '<span style="font-size:13px;color:#303042;">' + label + '</span>' +
+      '<div data-perm="' + key + '" style="width:38px;height:22px;border-radius:50px;background:' + bg + ';position:relative;cursor:pointer;flex-shrink:0;">' +
+        '<div style="width:18px;height:18px;border-radius:50%;background:#FFFFFF;position:absolute;top:2px;left:' + thumbLeft + ';"></div>' +
+      '</div>' +
+    '</div>';
+  }
+
+  function renderCaregiverProfile(idx){
+    hideFlowExtras();
+    var c = caregivers[idx];
+    waheader.innerHTML = detailHeader('#EFECF8', '#7B6FAD', c.initials, c.name, c.age, 20);
+    waheader.onclick = function(e){ if (e.target.closest('[data-back]')){ renderFamilia(); renderNavbar('familia'); } };
+
+    var patientsHtml = c.patientsLinked.length
+      ? c.patientsLinked.map(function(name, i){
+          var found = patients.filter(function(pp){ return pp.name === name; })[0];
+          var age = found ? found.age : '';
+          var initials = name.split(' ').map(function(w){ return w[0]; }).join('');
+          return '<div style="display:flex;align-items:center;gap:10px;padding:8px 0;' + (i < c.patientsLinked.length - 1 ? 'border-bottom:0.5px solid #EEEEEF;' : '') + '">' +
+            '<div style="width:32px;height:32px;border-radius:50%;background:#EFECF8;display:flex;align-items:center;justify-content:center;font-weight:500;font-size:12px;color:#7B6FAD;flex-shrink:0;">' + initials + '</div>' +
+            '<div style="flex:1;"><div style="font-size:13px;font-weight:500;color:#303042;">' + name + '</div><div style="font-size:11px;color:#8E8EA8;">' + age + '</div></div>' +
+          '</div>';
+        }).join('')
+      : '<div style="font-size:12px;color:#AAAAC6;padding:6px 0 10px;">Todavía no hay pacientes asociados.</div>';
+
+    wabody.innerHTML =
+      sectionLabel('Datos del acompañante') +
+      '<div style="background:#FFFFFF;border:' + CARD_BORDER + ';border-radius:16px;padding:16px;margin-bottom:20px;">' +
+        fieldRow('<div style="font-size:12px;color:#8E8EA8;">Vínculo: <span style="color:#303042;font-weight:500;">' + c.vinculo + '</span></div>') +
+        fieldRow('<span style="background:#EFECF8;color:#7B6FAD;font-size:11px;font-weight:600;padding:4px 12px;border-radius:50px;">Cuidador</span>') +
+        fieldRow(
+          '<div style="display:flex;align-items:center;gap:8px;background:#E6F2ED;border-radius:12px;padding:10px 12px;">' +
+            '<i class="ti ti-brand-whatsapp" style="color:#5A8B78;font-size:16px;" aria-hidden="true"></i>' +
+            '<span style="font-size:13px;color:#3F6455;font-weight:500;">' + c.phone + '</span>' +
+          '</div>', true
+        ) +
+      '</div>' +
+      sectionLabel('Pacientes asociados') +
+      '<div style="background:#FFFFFF;border:' + CARD_BORDER + ';border-radius:16px;padding:12px 16px;margin-bottom:20px;">' +
+        patientsHtml +
+        '<button data-open-add-profile="1" style="width:100%;background:none;border:1.5px dashed #C5BFE0;border-radius:12px;padding:10px;color:#7B6FAD;font-size:13px;font-weight:500;margin-top:6px;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:6px;"><i class="ti ti-user-plus" style="font-size:15px;" aria-hidden="true"></i>Vincular paciente</button>' +
+      '</div>' +
+      sectionLabel('Permisos') +
+      '<div style="background:#FFFFFF;border:' + CARD_BORDER + ';border-radius:16px;padding:0 16px;">' +
+        permToggle(c.permisos,'citas','Citas · Ver eventos y detalles') +
+        permToggle(c.permisos,'tareas','Tareas · Ver y completar tareas') +
+        permToggle(c.permisos,'documentos','Documentos · Acceder a archivos') +
+        permToggle(c.permisos,'notas','Notas · Leer notas del historial', true) +
+      '</div>';
+
+    wabody.onclick = function(e){
+      if (e.target.closest('[data-open-add-profile]')){ openAddProfileModal(); return; }
+      var perm = e.target.closest('[data-perm]');
+      if (perm){ c.permisos[perm.dataset.perm] = !c.permisos[perm.dataset.perm]; renderCaregiverProfile(idx); }
+    };
+  }
+
+  function progressBarHtml(e){
+    var total = e.checklist.length;
+    if (!total) return '';
+    var done = e.checklist.filter(function(c){ return c.done; }).length;
+    var pct = Math.round(done / total * 100);
+    return '<div style="margin-top:12px;">' +
+      '<div style="height:8px;background:#EFECF8;border-radius:8px;overflow:hidden;margin-bottom:6px;"><div style="height:100%;width:' + pct + '%;background:#7B6FAD;border-radius:8px;"></div></div>' +
+      '<div style="font-size:11px;color:#8E8EA8;">Preparación · ' + done + '/' + total + ' · ' + pct + '%</div>' +
+    '</div>';
+  }
+
+  function shareHeader(title){
+    return '<div style="width:100%;"><div style="display:flex;align-items:center;gap:12px;"><i class="ti ti-arrow-left" data-cancel-flow="1" style="color:#303042;font-size:20px;cursor:pointer;" aria-label="Cancelar"></i><span style="font-size:16px;font-weight:500;color:#303042;">' + title + '</span></div></div>';
+  }
+
+  function renderEventoDetail(id, backFn){
+    var e = findEvento(id);
+    waheader.innerHTML = '<i class="ti ti-arrow-left" data-back="1" style="color:#303042;font-size:20px;cursor:pointer;" aria-label="Volver"></i>';
+    waheader.onclick = function(ev){ if (ev.target.closest('[data-back]')) backFn(); };
+    shareFab.onclick = function(){ startShareFlow('event', id, backFn); };
+
+    var checklistHtml = e.checklist.length
+      ? sectionLabel('Lista de preparación') +
+        '<div style="background:#FFFFFF;border:' + CARD_BORDER + ';border-radius:16px;padding:12px 16px;margin-bottom:20px;">' +
+          e.checklist.map(function(c, i){
+            return '<div data-check-idx="' + i + '" style="display:flex;align-items:center;gap:10px;padding:10px 0;cursor:pointer;' + (i < e.checklist.length - 1 ? 'border-bottom:0.5px solid #EEEEEF;' : '') + '">' +
+              (c.done
+                ? '<i class="ti ti-square-check" style="color:#5A8B78;font-size:19px;flex-shrink:0;" aria-hidden="true"></i>'
+                : '<div style="width:16px;height:16px;border:1.5px solid #AAAAC6;border-radius:4px;flex-shrink:0;"></div>') +
+              '<span style="font-size:13px;color:' + (c.done ? '#8E8EA8' : '#303042') + ';text-decoration:' + (c.done ? 'line-through' : 'none') + ';">' + c.text + '</span>' +
+            '</div>';
+          }).join('') +
+        '</div>'
+      : '';
+
+    var notasHtml = e.notas.length
+      ? sectionLabel('Notas') +
+        '<div style="background:#FFFFFF;border:' + CARD_BORDER + ';border-radius:16px;padding:16px;margin-bottom:20px;">' +
+          e.notas.map(function(n){ return '<div style="font-size:13px;color:#303042;margin-bottom:6px;">' + n + '</div>'; }).join('') +
+        '</div>'
+      : '';
+
+    var docsHtml = e.documentos.length
+      ? sectionLabel('Documentos adjuntos') +
+        '<div style="background:#FFFFFF;border:' + CARD_BORDER + ';border-radius:16px;padding:12px 16px;">' +
+          e.documentos.map(function(doc, i){
+            return '<div style="display:flex;align-items:center;gap:10px;padding:8px 0;' + (i < e.documentos.length - 1 ? 'border-bottom:0.5px solid #EEEEEF;' : '') + '">' +
+              '<i class="ti ti-file-text" style="color:#7B6FAD;font-size:16px;" aria-hidden="true"></i>' +
+              '<span style="flex:1;font-size:13px;color:#303042;">' + doc + '</span>' +
+              '<i class="ti ti-download" style="color:#8E8EA8;font-size:15px;" aria-hidden="true"></i>' +
+            '</div>';
+          }).join('') +
+        '</div>'
+      : '';
+
+    wabody.innerHTML =
+      '<div style="background:#FFFFFF;border:' + CARD_BORDER + ';border-radius:16px;padding:16px;margin-bottom:20px;">' +
+        '<div style="display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:6px;">' +
+          '<div style="font-size:18px;font-weight:600;color:#303042;flex:1;padding-right:8px;">' + e.title + '</div>' +
+          '<button style="background:#FFFFFF;border:0.5px solid #EEEEEF;border-radius:50px;padding:6px 14px;font-size:12px;font-weight:500;color:#50506A;display:flex;align-items:center;gap:6px;cursor:pointer;flex-shrink:0;"><i class="ti ti-pencil" style="font-size:12px;" aria-hidden="true"></i>Editar</button>' +
+        '</div>' +
+        '<div style="font-size:12px;color:#8E8EA8;margin-bottom:10px;">' + e.fechaLarga + '</div>' +
+        '<div>' +
+          '<span style="background:#EFECF8;color:#7B6FAD;font-size:11px;font-weight:600;padding:4px 12px;border-radius:50px;margin-right:6px;">Cita</span>' +
+          '<span style="background:#EFECF8;color:#7B6FAD;font-size:11px;font-weight:600;padding:4px 12px;border-radius:50px;">' + e.especialidad + '</span>' +
+        '</div>' +
+        progressBarHtml(e) +
+      '</div>' +
+      sectionLabel('Datos de la cita') +
+      '<div style="background:#FFFFFF;border:' + CARD_BORDER + ';border-radius:16px;padding:16px;margin-bottom:20px;">' +
+        fieldRow(iconRow('ti-user', e.paciente + ' (' + e.vinculo.toLowerCase() + ')')) +
+        fieldRow(iconRow('ti-stethoscope', e.medico + ' · ' + e.centro)) +
+        fieldRow(iconRow('ti-calendar-event', e.fechaLarga)) +
+        fieldRow(
+          '<div style="display:flex;align-items:flex-start;gap:8px;">' +
+            '<i class="ti ti-map-pin" style="color:#8E8EA8;font-size:15px;margin-top:2px;flex-shrink:0;" aria-hidden="true"></i>' +
+            '<div><div style="font-size:13px;color:#303042;">' + e.ubicacion + '</div><span class="cta-link" style="font-size:12px;">Ver en el mapa</span></div>' +
+          '</div>', true
+        ) +
+      '</div>' +
+      checklistHtml + notasHtml + docsHtml;
+
+    wabody.onclick = function(ev){
+      var chk = ev.target.closest('[data-check-idx]');
+      if (chk){
+        var i = Number(chk.dataset.checkIdx);
+        e.checklist[i].done = !e.checklist[i].done;
+        renderEventoDetail(id, backFn);
+      }
+    };
+  }
+
+  function renderTareaDetail(id, backFn){
+    var t = findTarea(id);
+    waheader.innerHTML = '<i class="ti ti-arrow-left" data-back="1" style="color:#303042;font-size:20px;cursor:pointer;" aria-label="Volver"></i>';
+    waheader.onclick = function(ev){ if (ev.target.closest('[data-back]')) backFn(); };
+    shareFab.onclick = function(){ startShareFlow('task', id, backFn); };
+
+    var notesInner = tareaFormState.addingNote
+      ? '<textarea data-note-input="1" placeholder="Escribí una nota…" style="width:100%;box-sizing:border-box;background:#FBF8FF;border:0.5px solid #C5BFE0;border-radius:12px;padding:10px 12px;font-size:13px;color:#303042;min-height:60px;margin-bottom:10px;">' + tareaFormState.noteText + '</textarea>' +
+        '<div style="display:flex;gap:8px;">' +
+          '<button data-cancel-note="1" style="flex:1;background:#FFFFFF;border:0.5px solid #AAAAC6;border-radius:50px;padding:9px;font-size:13px;color:#50506A;cursor:pointer;">Cancelar</button>' +
+          '<button data-save-note="1" style="flex:1;background:#7B6FAD;border:none;border-radius:50px;padding:9px;font-size:13px;color:#FFFFFF;cursor:pointer;">Guardar nota</button>' +
+        '</div>'
+      : (t.notas.length ? t.notas.map(function(n){ return '<div style="font-size:13px;color:#303042;margin-bottom:6px;">' + n + '</div>'; }).join('') : '<div style="font-size:13px;color:#AAAAC6;margin-bottom:10px;">Sin notas aún.</div>') +
+        '<button data-add-note="1" style="background:none;border:none;color:#7B6FAD;font-size:13px;font-weight:500;cursor:pointer;padding:0;">+ Añadir</button>';
+
+    wabody.innerHTML =
+      '<div style="background:#FFFFFF;border:' + CARD_BORDER + ';border-radius:16px;padding:16px;margin-bottom:20px;">' +
+        '<div style="display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:10px;">' +
+          '<div style="font-size:18px;font-weight:600;color:#303042;flex:1;padding-right:8px;">' + t.title + '</div>' +
+          '<button style="background:#FFFFFF;border:0.5px solid #EEEEEF;border-radius:50px;padding:6px 14px;font-size:12px;font-weight:500;color:#50506A;display:flex;align-items:center;gap:6px;cursor:pointer;flex-shrink:0;"><i class="ti ti-pencil" style="font-size:12px;" aria-hidden="true"></i>Editar</button>' +
+        '</div>' +
+        '<div>' +
+          '<span style="background:#E6F2ED;color:#5A8B78;font-size:11px;font-weight:600;padding:4px 12px;border-radius:50px;margin-right:6px;">Tarea</span>' +
+          '<span style="background:#EFECF8;color:#7B6FAD;font-size:11px;font-weight:600;padding:4px 12px;border-radius:50px;">' + t.especialidad + '</span>' +
+        '</div>' +
+      '</div>' +
+      sectionLabel('Datos principales') +
+      '<div style="background:#FFFFFF;border:' + CARD_BORDER + ';border-radius:16px;padding:16px;margin-bottom:20px;">' +
+        fieldRow(iconRow('ti-user', t.paciente)) +
+        fieldRow(
+          '<div style="display:flex;align-items:center;justify-content:space-between;">' +
+            iconRow('ti-users', t.acompanante) +
+            '<i class="ti ti-pencil" style="color:#8E8EA8;font-size:14px;cursor:pointer;" aria-hidden="true"></i>' +
+          '</div>'
+        ) +
+        fieldRow('<span style="font-size:13px;color:#303042;">' + t.detalle + '</span>') +
+        fieldRow(iconRow('ti-calendar-event', 'Vence ' + t.vencimiento), true) +
+      '</div>' +
+      sectionLabel('Notas') +
+      '<div style="background:#FFFFFF;border:' + CARD_BORDER + ';border-radius:16px;padding:16px;margin-bottom:20px;">' + notesInner + '</div>' +
+      sectionLabel('Archivos adjuntos') +
+      '<div style="background:#FFFFFF;border:' + CARD_BORDER + ';border-radius:16px;padding:16px;">' +
+        (t.archivos.length
+          ? t.archivos.map(function(f, i){ return '<div style="display:flex;align-items:center;gap:10px;padding:8px 0;' + (i < t.archivos.length - 1 ? 'border-bottom:0.5px solid #EEEEEF;' : '') + '"><i class="ti ti-file-text" style="color:#7B6FAD;font-size:16px;" aria-hidden="true"></i><span style="flex:1;font-size:13px;color:#303042;">' + f + '</span></div>'; }).join('')
+          : '<div style="font-size:13px;color:#AAAAC6;margin-bottom:10px;">No tenés documentos adjuntos aún.</div>') +
+        '<button data-add-file="1" style="background:#7B6FAD;border:none;border-radius:50px;padding:9px 16px;color:#FFFFFF;font-size:13px;font-weight:500;cursor:pointer;margin-top:6px;">Adjuntar archivo</button>' +
+      '</div>';
+
+    wabody.onclick = function(ev){
+      if (ev.target.closest('[data-add-note]')){ tareaFormState.addingNote = true; tareaFormState.noteText = ''; renderTareaDetail(id, backFn); return; }
+      if (ev.target.closest('[data-cancel-note]')){ tareaFormState.addingNote = false; renderTareaDetail(id, backFn); return; }
+      if (ev.target.closest('[data-save-note]')){
+        if (tareaFormState.noteText.trim()) t.notas.push(tareaFormState.noteText.trim());
+        tareaFormState.addingNote = false;
+        renderTareaDetail(id, backFn);
+        return;
+      }
+      if (ev.target.closest('[data-add-file]')){ t.archivos.push('comprobante_' + (t.archivos.length + 1) + '.pdf'); renderTareaDetail(id, backFn); }
+    };
+    wabody.oninput = function(ev){ if (ev.target.dataset.noteInput) tareaFormState.noteText = ev.target.value; };
+  }
+
+  function stepperHtml(currentStep){
+    var labels = ['Cuidador','Contenido','Mensaje'];
+    var blocks = labels.map(function(label, i){
+      var stepNum = i + 1;
+      var state = stepNum < currentStep ? 'done' : (stepNum === currentStep ? 'active' : 'pending');
+      var circleBg = state === 'active' ? '#7B6FAD' : (state === 'done' ? '#C5BFE0' : '#FFFFFF');
+      var circleBorder = state === 'pending' ? '1.5px solid #EFECF8' : 'none';
+      var circleColor = state === 'pending' ? '#7B6FAD' : (state === 'done' ? '#524784' : '#FFFFFF');
+      var textColor = state === 'active' ? '#7B6FAD' : '#8E8EA8';
+      var textWeight = state === 'active' ? '600' : '500';
+      return '<div style="display:flex;flex-direction:column;align-items:center;flex-shrink:0;">' +
+        '<div style="width:28px;height:28px;border-radius:50%;background:' + circleBg + ';border:' + circleBorder + ';display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:600;color:' + circleColor + ';margin-bottom:6px;">' + stepNum + '</div>' +
+        '<span style="font-size:11px;font-weight:' + textWeight + ';color:' + textColor + ';white-space:nowrap;">' + label + '</span>' +
+      '</div>';
+    });
+    var connector = '<div style="flex:1;height:2px;background:#C5BFE0;margin-top:13px;"></div>';
+    return '<div style="display:flex;align-items:flex-start;margin:6px 0 20px;padding:0 10px;">' +
+      blocks[0] + connector + blocks[1] + connector + blocks[2] +
+    '</div>';
+  }
+
+  function mdToHtml(text){
+    return text.replace(/\*(.+?)\*/g, '<strong>$1</strong>').replace(/\n/g, '<br>');
+  }
+
+  function buildShareMessage(kind, item, selected, caregiverName){
+    var firstName = caregiverName.split(' ')[0];
+    var lines = ['¡Hola ' + firstName + '! Te comparto los datos de ' + (kind === 'event' ? 'la cita' : 'la tarea') + ' de ' + item.paciente + ':', '', '*' + item.title + '*'];
+    if (kind === 'event'){
+      if (selected.fecha) lines.push('📅 ' + item.fechaLarga);
+      if (selected.lugar) lines.push('📍 ' + item.ubicacion);
+      if (selected.medico) lines.push('🩺 ' + item.medico + ' · ' + item.centro);
+      if (selected.checklist && item.checklist.length){
+        lines.push('');
+        lines.push('*Lista de preparación:*');
+        item.checklist.forEach(function(c){ lines.push('- ' + c.text); });
+      }
+      if (selected.notas && item.notas.length){
+        lines.push('');
+        lines.push('*Notas:*');
+        item.notas.forEach(function(n){ lines.push('- ' + n); });
+      }
+      if (selected.documentos && item.documentos.length){
+        lines.push('');
+        lines.push('*Documentos adjuntos:*');
+        item.documentos.forEach(function(d){ lines.push('📎 ' + d); });
+      }
+    } else {
+      if (selected.detalle) lines.push(item.detalle);
+      if (selected.vencimiento) lines.push('🗓️ Vence ' + item.vencimiento);
+      if (selected.notas && item.notas.length){
+        lines.push('');
+        lines.push('*Notas:*');
+        item.notas.forEach(function(n){ lines.push('- ' + n); });
+      }
+      if (selected.archivos && item.archivos.length){
+        lines.push('');
+        lines.push('*Archivos adjuntos:*');
+        item.archivos.forEach(function(f){ lines.push('📎 ' + f); });
+      }
+    }
+    return lines.join('\n');
+  }
+
+  function startShareFlow(kind, itemId, backFn){
+    appnavbar.style.display = 'none';
+    shareFab.style.display = 'none';
+    shareFlow = {
+      step:1, kind:kind, itemId:itemId, caregiverIdx:null, backFn:backFn,
+      selected:{fecha:true, lugar:true, medico:true, detalle:true, vencimiento:true, checklist:true, notas:true, documentos:true, archivos:true}
+    };
+    renderShareStep1();
+  }
+
+  function cancelShareFlow(){
+    appnavbar.style.display = 'flex';
+    flowFooter.style.display = 'none';
+    openDetail(shareFlow.itemId, shareFlow.kind, shareFlow.backFn);
+  }
+
+  function renderShareStep1(){
+    var titleText = shareFlow.kind === 'event' ? 'Compartir cita' : 'Compartir tarea';
+    waheader.innerHTML = shareHeader(titleText);
+    waheader.onclick = function(e){ if (e.target.closest('[data-cancel-flow]')) cancelShareFlow(); };
+
+    var caregiverCards = caregivers.map(function(c, i){
+      var selected = shareFlow.caregiverIdx === i;
+      return '<div data-select-caregiver="' + i + '" style="display:flex;align-items:center;gap:12px;background:#FFFFFF;border:' + (selected ? '1.5px solid #7B6FAD' : CARD_BORDER) + ';border-radius:16px;padding:14px;margin-bottom:10px;cursor:pointer;">' +
+        '<div style="width:18px;height:18px;border-radius:50%;border:1.5px solid ' + (selected ? '#7B6FAD' : '#AAAAC6') + ';display:flex;align-items:center;justify-content:center;flex-shrink:0;">' + (selected ? '<div style="width:10px;height:10px;border-radius:50%;background:#7B6FAD;"></div>' : '') + '</div>' +
+        '<div style="width:38px;height:38px;border-radius:50%;background:#EFECF8;display:flex;align-items:center;justify-content:center;font-weight:500;font-size:13px;color:#7B6FAD;flex-shrink:0;">' + c.initials + '</div>' +
+        '<div style="flex:1;min-width:0;"><div style="font-size:14px;font-weight:500;color:#303042;">' + c.name + '</div><div style="font-size:12px;color:#8E8EA8;">Cuidador · ' + c.phone + '</div></div>' +
+      '</div>';
+    }).join('');
+
+    wabody.innerHTML =
+      stepperHtml(1) +
+      caregiverCards +
+      '<button style="width:100%;background:none;border:1.5px dashed #C5BFE0;border-radius:16px;padding:14px;color:#7B6FAD;font-size:14px;font-weight:500;margin-top:6px;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:8px;"><i class="ti ti-user-plus" style="font-size:18px;" aria-hidden="true"></i>Agregar nuevo acompañante</button>';
+
+    wabody.onclick = function(e){
+      var sel = e.target.closest('[data-select-caregiver]');
+      if (sel){ shareFlow.caregiverIdx = Number(sel.dataset.selectCaregiver); renderShareStep1(); }
+    };
+
+    var canContinue = shareFlow.caregiverIdx !== null;
+    flowFooter.style.display = 'flex';
+    flowFooter.innerHTML =
+      '<button data-cancel-flow="1" style="flex:1;background:#FFFFFF;border:1px solid #C5BFE0;border-radius:50px;padding:12px;font-size:14px;font-weight:500;color:#7B6FAD;cursor:pointer;">Cancelar</button>' +
+      '<button id="continue-btn" style="flex:1;background:' + (canContinue ? '#7B6FAD' : '#C5BFE0') + ';border:none;border-radius:50px;padding:12px;font-size:14px;font-weight:500;color:#FFFFFF;cursor:' + (canContinue ? 'pointer' : 'default') + ';">Continuar</button>';
+    flowFooter.onclick = function(e){
+      if (e.target.closest('[data-cancel-flow]')){ cancelShareFlow(); return; }
+      if (e.target.closest('#continue-btn') && shareFlow.caregiverIdx !== null){ renderShareStep2(); }
+    };
+  }
+
+  function renderShareStep2(){
+    var item = shareFlow.kind === 'event' ? findEvento(shareFlow.itemId) : findTarea(shareFlow.itemId);
+    var caregiver = caregivers[shareFlow.caregiverIdx];
+    var perms = caregiver.permisos;
+    var titleText = shareFlow.kind === 'event' ? 'Compartir cita' : 'Compartir tarea';
+    waheader.innerHTML = shareHeader(titleText);
+    waheader.onclick = function(e){ if (e.target.closest('[data-cancel-flow]')) cancelShareFlow(); };
+
+    var options = [];
+    if (shareFlow.kind === 'event'){
+      options.push({key:'fecha', label:'Fecha y hora', sub:item.fechaLarga, disabled:!perms.citas});
+      options.push({key:'lugar', label:'Lugar', sub:item.ubicacion, disabled:!perms.citas});
+      options.push({key:'medico', label:'Médico y centro', sub:item.medico + ' · ' + item.centro, disabled:!perms.citas});
+      if (item.checklist.length) options.push({key:'checklist', label:'Lista de preparación', sub:item.checklist.length + ' ítem(s)', disabled:false});
+      if (item.notas.length) options.push({key:'notas', label:'Notas', sub:item.notas.length + ' nota(s)', disabled:!perms.notas});
+      if (item.documentos.length) options.push({key:'documentos', label:'Documentos adjuntos', sub:item.documentos.length + ' archivo(s)', disabled:!perms.documentos});
+    } else {
+      options.push({key:'detalle', label:'Detalle de la tarea', sub:item.detalle, disabled:!perms.tareas});
+      options.push({key:'vencimiento', label:'Vencimiento', sub:'Vence ' + item.vencimiento, disabled:!perms.tareas});
+      if (item.notas.length) options.push({key:'notas', label:'Notas', sub:item.notas.length + ' nota(s)', disabled:!perms.notas});
+      if (item.archivos.length) options.push({key:'archivos', label:'Archivos adjuntos', sub:item.archivos.length + ' archivo(s)', disabled:!perms.documentos});
+    }
+    options.forEach(function(o){ if (o.disabled) shareFlow.selected[o.key] = false; });
+
+    var optionsHtml = options.map(function(o, i){
+      var checked = !!shareFlow.selected[o.key] && !o.disabled;
+      return '<div data-toggle-item="' + o.key + '" data-disabled="' + (o.disabled ? '1' : '0') + '" style="display:flex;align-items:center;gap:12px;padding:12px 0;' + (i < options.length - 1 ? 'border-bottom:0.5px solid #EEEEEF;' : '') + (o.disabled ? 'opacity:.5;' : 'cursor:pointer;') + '">' +
+        (checked
+          ? '<i class="ti ti-square-check" style="color:#7B6FAD;font-size:20px;flex-shrink:0;" aria-hidden="true"></i>'
+          : '<div style="width:18px;height:18px;border:1.5px solid #AAAAC6;border-radius:5px;flex-shrink:0;"></div>') +
+        '<div style="flex:1;min-width:0;"><div style="font-size:13px;font-weight:500;color:#303042;">' + o.label + '</div><div style="font-size:11px;color:#8E8EA8;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">' + o.sub + (o.disabled ? ' · sin permiso' : '') + '</div></div>' +
+      '</div>';
+    }).join('');
+
+    wabody.innerHTML =
+      stepperHtml(2) +
+      '<div style="background:#FFFFFF;border:' + CARD_BORDER + ';border-radius:16px;padding:6px 16px;">' + optionsHtml + '</div>';
+
+    wabody.onclick = function(e){
+      var t = e.target.closest('[data-toggle-item]');
+      if (t && t.dataset.disabled === '0'){ shareFlow.selected[t.dataset.toggleItem] = !shareFlow.selected[t.dataset.toggleItem]; renderShareStep2(); }
+    };
+
+    flowFooter.style.display = 'flex';
+    flowFooter.innerHTML =
+      '<button data-cancel-flow="1" style="flex:1;background:#FFFFFF;border:1px solid #C5BFE0;border-radius:50px;padding:12px;font-size:14px;font-weight:500;color:#7B6FAD;cursor:pointer;">Cancelar</button>' +
+      '<button id="preview-btn" style="flex:1;background:#7B6FAD;border:none;border-radius:50px;padding:12px;font-size:14px;font-weight:500;color:#FFFFFF;cursor:pointer;">Ver mensaje</button>';
+    flowFooter.onclick = function(e){
+      if (e.target.closest('[data-cancel-flow]')){ cancelShareFlow(); return; }
+      if (e.target.closest('#preview-btn')){ renderShareStep3(); }
+    };
+  }
+
+  function renderShareStep3(){
+    var item = shareFlow.kind === 'event' ? findEvento(shareFlow.itemId) : findTarea(shareFlow.itemId);
+    var caregiver = caregivers[shareFlow.caregiverIdx];
+    var titleText = shareFlow.kind === 'event' ? 'Compartir cita' : 'Compartir tarea';
+    waheader.innerHTML = shareHeader(titleText);
+    waheader.onclick = function(e){ if (e.target.closest('[data-cancel-flow]')) cancelShareFlow(); };
+
+    var messageHtml = mdToHtml(buildShareMessage(shareFlow.kind, item, shareFlow.selected, caregiver.name));
+
+    wabody.innerHTML =
+      stepperHtml(3) +
+      '<div style="background:#FFFFFF;border:' + CARD_BORDER + ';border-radius:16px;overflow:hidden;">' +
+        '<div style="background:#3F6455;padding:10px 14px;display:flex;align-items:center;gap:10px;">' +
+          '<div style="width:30px;height:30px;border-radius:50%;background:#EFECF8;display:flex;align-items:center;justify-content:center;font-weight:500;font-size:12px;color:#3F6455;flex-shrink:0;">' + caregiver.initials + '</div>' +
+          '<span style="color:#FFFFFF;font-size:13px;font-weight:500;">' + caregiver.name + '</span>' +
+        '</div>' +
+        '<div style="background:#E5DDD5;padding:14px;">' +
+          '<div style="background:#FFFFFF;border-radius:8px;border-top-left-radius:2px;padding:10px 12px;font-size:13px;line-height:1.6;color:#303042;">' + messageHtml + '</div>' +
+        '</div>' +
+      '</div>';
+
+    wabody.onclick = null;
+
+    flowFooter.style.display = 'flex';
+    flowFooter.innerHTML =
+      '<button id="edit-selection-btn" style="flex:1;background:#EEEEEF;border:none;border-radius:50px;padding:12px;font-size:14px;font-weight:500;color:#303042;cursor:pointer;">Editar selección</button>' +
+      '<button id="send-whatsapp-btn" style="flex:1;background:#5A8B78;border:none;border-radius:50px;padding:12px;font-size:14px;font-weight:500;color:#FFFFFF;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:6px;"><i class="ti ti-brand-whatsapp" style="font-size:16px;" aria-hidden="true"></i>Enviar</button>';
+    flowFooter.onclick = function(e){
+      if (e.target.closest('#edit-selection-btn')){ renderShareStep2(); return; }
+      if (e.target.closest('#send-whatsapp-btn')){ renderShareStep4(); }
+    };
+  }
+
+  function renderShareStep4(){
+    var caregiver = caregivers[shareFlow.caregiverIdx];
+    waheader.innerHTML = '';
+    waheader.onclick = null;
+    flowFooter.style.display = 'none';
+    flowFooter.onclick = null;
+
+    wabody.innerHTML =
+      '<div style="display:flex;flex-direction:column;align-items:center;text-align:center;padding:60px 20px 20px;">' +
+        '<div style="width:72px;height:72px;border-radius:50%;background:#7B6FAD;display:flex;align-items:center;justify-content:center;margin-bottom:20px;"><i class="ti ti-check" style="color:#FFFFFF;font-size:32px;" aria-hidden="true"></i></div>' +
+        '<div style="font-size:16px;font-weight:500;color:#303042;margin-bottom:10px;">Mensaje enviado con éxito a ' + caregiver.name + '</div>' +
+        '<span class="cta-link" style="font-size:13px;margin-bottom:24px;">Ir al chat</span>' +
+        '<button id="back-to-item" style="width:100%;background:#7B6FAD;border:none;border-radius:50px;padding:12px;font-size:14px;font-weight:500;color:#FFFFFF;cursor:pointer;">Volver ' + (shareFlow.kind === 'event' ? 'al evento' : 'a la tarea') + '</button>' +
+      '</div>';
+
+    wabody.onclick = function(e){
+      if (e.target.closest('#back-to-item')){ cancelShareFlow(); }
+    };
+  }
+
+  function openModal(html){
+    modalSheet.innerHTML = html;
+    modalOverlay.style.display = 'flex';
+  }
+  function closeModal(){
+    modalOverlay.style.display = 'none';
+    modalSheet.innerHTML = '';
+  }
+  modalOverlay.onclick = function(e){ if (e.target === modalOverlay) closeModal(); };
+
+  function addProfileListHtml(){
+    var unlinked = patients.concat(caregivers).some(function(p){ return p.name === 'Sofía García'; });
+    return '<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:16px;">' +
+        '<span style="font-size:16px;font-weight:500;color:#303042;">Agregar perfil</span>' +
+        '<i id="modal-close" class="ti ti-x" style="color:#8E8EA8;font-size:20px;cursor:pointer;" aria-label="Cerrar"></i>' +
+      '</div>' +
+      (unlinked ? '' :
+        '<div style="font-size:11px;font-weight:600;letter-spacing:1px;color:#8E8EA8;text-transform:uppercase;margin-bottom:8px;">Perfiles disponibles</div>' +
+        '<div data-link-profile="sofia" style="background:#FBF8FF;border:' + CARD_BORDER + ';border-radius:16px;padding:12px 14px;display:flex;align-items:center;gap:12px;margin-bottom:16px;cursor:pointer;">' +
+          '<div style="width:38px;height:38px;border-radius:50%;background:#EFECF8;display:flex;align-items:center;justify-content:center;font-weight:500;font-size:13px;color:#7B6FAD;flex-shrink:0;">SG</div>' +
+          '<div style="flex:1;"><div style="font-size:14px;font-weight:500;color:#303042;">Sofía García</div><div style="font-size:12px;color:#8E8EA8;">6 años · sin vincular</div></div>' +
+          '<i class="ti ti-plus" style="color:#7B6FAD;font-size:16px;" aria-hidden="true"></i>' +
+        '</div>') +
+      '<button data-open-form="1" style="width:100%;background:none;border:1.5px dashed #C5BFE0;border-radius:16px;padding:14px;color:#50506A;font-size:14px;font-weight:500;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:8px;"><i class="ti ti-user-plus" style="font-size:18px;" aria-hidden="true"></i>Nuevo acompañante</button>';
+  }
+
+  function profileFormHtml(){
+    var typeBtn = function(label, key){
+      var active = formState.type === key;
+      return '<button data-type-toggle="' + key + '" style="flex:1;background:' + (active ? '#FFFFFF' : '#EFECF8') + ';color:' + (active ? '#7B6FAD' : '#8E8EA8') + ';border:' + (active ? '1px solid #7B6FAD' : 'none') + ';border-radius:50px;padding:10px;font-size:13px;font-weight:500;cursor:pointer;">' + label + '</button>';
+    };
+    var vinculos = ['Mamá','Papá','Hijo/a','Pareja','Hermano/a','Otro'];
+    var vinculoOptions = vinculos.map(function(v){
+      return '<option value="' + v + '"' + (formState.vinculo === v ? ' selected' : '') + '>' + v + '</option>';
+    }).join('');
+    var fieldStyle = 'width:100%;box-sizing:border-box;background:#FBF8FF;border:0.5px solid #C5BFE0;border-radius:12px;padding:11px 14px;font-size:14px;color:#303042;';
+    var labelStyle = 'font-size:11px;font-weight:600;color:#8E8EA8;text-transform:uppercase;letter-spacing:1px;margin-bottom:6px;';
+
+    return '<div style="display:flex;align-items:center;gap:10px;margin-bottom:16px;">' +
+        '<i id="form-back" class="ti ti-arrow-left" style="color:#50506A;font-size:18px;cursor:pointer;" aria-label="Volver"></i>' +
+        '<span style="font-size:16px;font-weight:500;color:#303042;">Nuevo acompañante</span>' +
+      '</div>' +
+      '<div style="display:flex;gap:6px;background:#EFECF8;border-radius:50px;padding:4px;margin-bottom:16px;">' + typeBtn('Paciente','paciente') + typeBtn('Cuidador','cuidador') + '</div>' +
+      '<div style="' + labelStyle + '">Nombre completo</div>' +
+      '<input data-field="nombre" value="' + formState.nombre + '" placeholder="Ej. Sofía García" style="' + fieldStyle + 'margin-bottom:' + (formState.error ? '4px' : '14px') + ';" />' +
+      (formState.error ? '<div style="color:#D41831;font-size:12px;margin-bottom:12px;">' + formState.error + '</div>' : '') +
+      '<div style="' + labelStyle + '">Vínculo</div>' +
+      '<select data-field="vinculo" style="' + fieldStyle + 'margin-bottom:14px;">' + vinculoOptions + '</select>' +
+      '<div style="display:flex;gap:10px;margin-bottom:14px;">' +
+        '<div style="flex:1;"><div style="' + labelStyle + '">Edad</div><input data-field="edad" value="' + formState.edad + '" placeholder="Ej. 34" style="' + fieldStyle + '" /></div>' +
+        '<div style="flex:1;"><div style="' + labelStyle + '">Teléfono</div><input data-field="telefono" value="' + formState.telefono + '" placeholder="+54 9 11…" style="' + fieldStyle + '" /></div>' +
+      '</div>' +
+      (formState.type === 'paciente'
+        ? '<div style="' + labelStyle + '">Etiquetas médicas (opcional)</div><input data-field="etiquetas" value="' + formState.etiquetas + '" placeholder="Ej. Hipertensión, Diabetes tipo 2" style="' + fieldStyle + 'margin-bottom:18px;" />'
+        : '<div style="margin-bottom:18px;"></div>') +
+      '<div style="display:flex;gap:10px;">' +
+        '<button id="form-cancel" style="flex:1;background:#FFFFFF;border:0.5px solid #AAAAC6;border-radius:50px;padding:12px;font-size:14px;font-weight:500;color:#50506A;cursor:pointer;">Cancelar</button>' +
+        '<button id="form-save" style="flex:1;background:#7B6FAD;border:none;border-radius:50px;padding:12px;font-size:14px;font-weight:500;color:#FFFFFF;cursor:pointer;">Guardar perfil</button>' +
+      '</div>';
+  }
+
+  function openAddProfileModal(){
+    openModal(addProfileListHtml());
+  }
+
+  function linkExistingProfile(key){
+    if (key === 'sofia'){
+      patients.push({initials:'SG', name:'Sofía García', age:'6 años', links:[], vinculo:'Hija', phone:'', tags:[], created:'Creado hoy', itemIds:['ev-pediatra-sofia'], isNew:true});
+    }
+    closeModal();
+    appState.familiaTab = 'pacientes';
+    renderFamilia();
+    renderNavbar('familia');
+  }
+
+  function saveNewProfile(){
+    if (!formState.nombre || !formState.nombre.trim()){
+      formState.error = 'Campo obligatorio';
+      openModal(profileFormHtml());
+      return;
+    }
+    var initials = formState.nombre.trim().split(' ').map(function(w){ return w[0]; }).slice(0,2).join('').toUpperCase();
+    var ageLabel = formState.edad ? formState.edad + ' años' : '';
+    var tagsArr = formState.etiquetas ? formState.etiquetas.split(',').map(function(t){ return t.trim(); }).filter(Boolean) : [];
+    if (formState.type === 'cuidador'){
+      caregivers.push({initials:initials, name:formState.nombre.trim(), age:ageLabel, links:[], vinculo:formState.vinculo, phone:formState.telefono, patientsLinked:[], permisos:{citas:true,tareas:true,documentos:false,notas:false}, isNew:true});
+      appState.familiaTab = 'cuidadores';
+    } else {
+      patients.push({initials:initials, name:formState.nombre.trim(), age:ageLabel, links:[], vinculo:formState.vinculo, phone:formState.telefono, tags:tagsArr, created:'Creado hoy', itemIds:[], isNew:true});
+      appState.familiaTab = 'pacientes';
+    }
+    closeModal();
+    renderFamilia();
+    renderNavbar('familia');
+  }
+
+  modalSheet.onclick = function(e){
+    if (e.target.closest('#modal-close')){ closeModal(); return; }
+    var linkEl = e.target.closest('[data-link-profile]');
+    if (linkEl){ linkExistingProfile(linkEl.dataset.linkProfile); return; }
+    if (e.target.closest('[data-open-form]')){
+      formState = {type:'paciente', nombre:'', vinculo:'Mamá', edad:'', telefono:'', etiquetas:'', error:''};
+      openModal(profileFormHtml());
+      return;
+    }
+    if (e.target.closest('#form-back')){ openModal(addProfileListHtml()); return; }
+    var typeToggle = e.target.closest('[data-type-toggle]');
+    if (typeToggle){ formState.type = typeToggle.dataset.typeToggle; openModal(profileFormHtml()); return; }
+    if (e.target.closest('#form-cancel')){ closeModal(); return; }
+    if (e.target.closest('#form-save')){ saveNewProfile(); return; }
+  };
+  modalSheet.oninput = function(e){ if (e.target.dataset.field) formState[e.target.dataset.field] = e.target.value; };
+  modalSheet.onchange = modalSheet.oninput;
+
+  function toggleRow(label, key, isLast){
+    return permToggle(appState.notifs, key, label, isLast);
+  }
+
+  function renderAjustes(){
+    hideFlowExtras();
+    waheader.onclick = null;
+    waheader.innerHTML = screenHeader('Ajustes');
+    wabody.innerHTML =
+      '<div style="background:#FFFFFF;border:' + CARD_BORDER + ';border-radius:16px;padding:16px;display:flex;align-items:center;gap:12px;margin-bottom:20px;">' +
+        '<div style="width:44px;height:44px;border-radius:50%;background:#EFECF8;display:flex;align-items:center;justify-content:center;font-weight:500;font-size:14px;color:#7B6FAD;flex-shrink:0;">MB</div>' +
+        '<div style="flex:1;min-width:0;">' +
+          '<div style="font-size:14px;font-weight:500;color:#303042;">Mónica Bozzarello</div>' +
+          '<div style="font-size:12px;color:#8E8EA8;">jbozzarello@gmail.com</div>' +
+          '<span style="display:inline-block;margin-top:4px;background:#E6F2ED;color:#5A8B78;font-size:11px;font-weight:600;padding:2px 10px;border-radius:50px;">Cuidadora principal</span>' +
+        '</div>' +
+        '<div style="width:32px;height:32px;border-radius:50%;background:#FFFFFF;border:0.5px solid #EEEEEF;display:flex;align-items:center;justify-content:center;flex-shrink:0;"><i class="ti ti-pencil" style="color:#50506A;font-size:14px;" aria-hidden="true"></i></div>' +
+      '</div>' +
+      sectionLabel('Notificaciones') +
+      '<div style="background:#FFFFFF;border:' + CARD_BORDER + ';border-radius:16px;padding:0 16px;margin-bottom:20px;">' +
+        toggleRow('Citas médicas','citas') + toggleRow('Recordatorios de tareas','tareas') + toggleRow('Elementos compartidos','compartidos') + toggleRow('Solicitudes de acceso','solicitudes',true) +
+      '</div>' +
+      sectionLabel('Actividad') +
+      '<div data-open-historial="1" style="background:#FFFFFF;border:' + CARD_BORDER + ';border-radius:16px;padding:14px 16px;display:flex;align-items:center;gap:10px;margin-bottom:20px;cursor:pointer;">' +
+        '<i class="ti ti-clock" style="color:#8E8EA8;font-size:16px;" aria-hidden="true"></i>' +
+        '<span style="flex:1;font-size:13px;font-weight:500;color:#303042;">Historial</span>' +
+        '<i class="ti ti-chevron-right" style="color:#AAAAC6;font-size:16px;" aria-hidden="true"></i>' +
+      '</div>' +
+      sectionLabel('Preferencias') +
+      '<div style="background:#FFFFFF;border:' + CARD_BORDER + ';border-radius:16px;padding:0 16px;">' +
+        '<div style="display:flex;align-items:center;justify-content:space-between;padding:12px 0;border-bottom:0.5px solid #EEEEEF;"><span style="font-size:13px;color:#303042;">Tema de la app</span><span style="font-size:12px;color:#8E8EA8;">Claro</span></div>' +
+        '<div style="display:flex;align-items:center;justify-content:space-between;padding:12px 0;"><span style="font-size:13px;color:#303042;">Idioma</span><span style="font-size:12px;color:#8E8EA8;">Español</span></div>' +
+      '</div>';
+
+    wabody.onclick = function(e){
+      var el = e.target.closest('[data-perm]');
+      if (el){ appState.notifs[el.dataset.perm] = !appState.notifs[el.dataset.perm]; renderAjustes(); return; }
+      if (e.target.closest('[data-open-historial]')){ renderHistorial(function(){ renderScreen('ajustes'); }); }
+    };
+  }
+
+  function chipHtml(estado){
+    var map = {
+      'Completado': {bg:'#EFECF8', color:'#7B6FAD'},
+      'Compartido': {bg:'#E6F2ED', color:'#5A8B78'},
+      'Actualización': {bg:'#C5BFE0', color:'#524784'},
+      'Nota': {bg:'#AAAAC6', color:'#50506A'}
+    };
+    var c = map[estado] || map['Actualización'];
+    return '<span style="background:' + c.bg + ';color:' + c.color + ';font-size:10px;font-weight:600;padding:3px 10px;border-radius:50px;flex-shrink:0;">' + estado + '</span>';
+  }
+
+  function historyFilterBtn(label, key){
+    var active = key === historyState.filter;
+    var bg = active ? '#7B6FAD' : '#EFECF8';
+    var color = active ? '#FFFFFF' : '#7B6FAD';
+    return '<button data-hfilter="' + key + '" style="background:' + bg + ';color:' + color + ';border:none;border-radius:50px;padding:7px 14px;font-size:12px;font-weight:500;margin-right:6px;margin-bottom:6px;cursor:pointer;">' + label + '</button>';
+  }
+
+  function timelineItemHtml(item, isLast){
+    return '<div style="display:flex;gap:10px;">' +
+      '<div style="display:flex;flex-direction:column;align-items:center;width:14px;flex-shrink:0;">' +
+        '<div style="width:8px;height:8px;border-radius:50%;background:#7B6FAD;margin-top:8px;flex-shrink:0;"></div>' +
+        (isLast ? '' : '<div style="flex:1;width:1px;background:#D6D6D6;margin-top:2px;"></div>') +
+      '</div>' +
+      '<div style="flex:1;background:#FFFFFF;border:' + CARD_BORDER + ';border-radius:16px;padding:16px;margin-bottom:12px;">' +
+        '<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:6px;">' +
+          '<span style="font-size:13px;font-weight:600;color:#303042;">' + item.hora + '</span>' +
+          chipHtml(item.estado) +
+        '</div>' +
+        '<div style="font-size:13px;color:#303042;margin-bottom:8px;">' + item.desc + '</div>' +
+        '<div style="font-size:11px;color:#8E8EA8;">' + item.quien + ' · ' + item.donde + '</div>' +
+      '</div>' +
+    '</div>';
+  }
+
+  function renderHistorial(backFn){
+    hideFlowExtras();
+    waheader.innerHTML = '<div style="display:flex;align-items:center;gap:12px;width:100%;">' +
+      '<i class="ti ti-arrow-left" data-back="1" style="color:#303042;font-size:20px;cursor:pointer;" aria-label="Volver"></i>' +
+      '<span style="font-size:16px;font-weight:500;color:#303042;">Historial</span>' +
+    '</div>';
+    waheader.onclick = function(e){ if (e.target.closest('[data-back]')) backFn(); };
+
+    var filtered = HISTORIAL.filter(function(h){ return historyState.filter === 'todos' || h.category === historyState.filter; });
+    var ordered = historyState.order === 'reciente' ? filtered : filtered.slice().reverse();
+
+    var groups = [];
+    ordered.forEach(function(item){
+      var g = groups.filter(function(g){ return g.date === item.date; })[0];
+      if (!g){ g = {date:item.date, items:[]}; groups.push(g); }
+      g.items.push(item);
+    });
+
+    var timelineHtml = groups.map(function(g){
+      return '<div style="font-size:11px;font-weight:600;color:#8E8EA8;text-transform:uppercase;letter-spacing:1px;margin:10px 0 8px;">' + g.date + '</div>' +
+        g.items.map(function(item, i){ return timelineItemHtml(item, i === g.items.length - 1); }).join('');
+    }).join('');
+
+    wabody.innerHTML =
+      '<div>' + historyFilterBtn('Todos','todos') + historyFilterBtn('Pacientes','pacientes') + historyFilterBtn('Archivos','archivos') + historyFilterBtn('Tareas','tareas') + historyFilterBtn('Familia','familia') + '</div>' +
+      '<div style="display:flex;justify-content:flex-end;margin:4px 0 4px;">' +
+        '<button data-toggle-order="1" style="background:#FFFFFF;border:0.5px solid #AAAAC6;border-radius:50px;padding:6px 14px;font-size:12px;font-weight:500;color:#50506A;display:flex;align-items:center;gap:6px;cursor:pointer;"><i class="ti ti-arrows-sort" style="font-size:13px;" aria-hidden="true"></i>' + (historyState.order === 'reciente' ? 'Más reciente' : 'Más antiguo') + '</button>' +
+      '</div>' +
+      timelineHtml;
+
+    wabody.onclick = function(e){
+      var f = e.target.closest('[data-hfilter]');
+      if (f){ historyState.filter = f.dataset.hfilter; renderHistorial(backFn); return; }
+      if (e.target.closest('[data-toggle-order]')){ historyState.order = historyState.order === 'reciente' ? 'antiguo' : 'reciente'; renderHistorial(backFn); }
+    };
+  }
+
+  function renderScreen(name){
+    if (name === 'agenda') renderAgenda();
+    else if (name === 'familia') renderFamilia();
+    else if (name === 'ajustes') renderAjustes();
+    else renderInicio();
+    renderNavbar(name);
+  }
+
+  function enterApp(){
+    statusbar.style.background = '#FBF8FF';
+    statusbar.innerHTML = '<span style="color:#303042;">10:44</span>' +
+      '<div style="display:flex;gap:5px;align-items:center;color:#303042;">' +
+        '<i class="ti ti-antenna-bars-5" style="font-size:14px;" aria-hidden="true"></i>' +
+        '<i class="ti ti-wifi" style="font-size:14px;" aria-hidden="true"></i>' +
+        '<i class="ti ti-battery-4" style="font-size:14px;" aria-hidden="true"></i>' +
+      '</div>';
+    waheader.style.background = '#FBF8FF';
+    waheader.style.borderBottom = '0.5px solid #EEEEEF';
+    document.getElementById('hint').style.display = 'none';
+    inputbar.style.display = 'none';
+    wabody.style.background = '#F7F7F7';
+    appnavbar.style.display = 'flex';
+    appnavbar.onclick = function(e){
+      var el = e.target.closest('[data-screen]');
+      if (!el) return;
+      renderScreen(el.dataset.screen);
+    };
+    renderScreen('inicio');
+  }
+
+  function resetSim(){
+    minute = 41;
+    appState.familiaTab = 'pacientes';
+    appState.agendaFilter = 'todo';
+    appState.notifs = {citas:true, tareas:true, compartidos:false, solicitudes:true};
+    historyState = {filter:'todos', order:'reciente'};
+    tareaFormState = {addingNote:false, noteText:''};
+    shareFlow = {step:1, kind:'', itemId:'', caregiverIdx:null, selected:{}, backFn:null};
+    patients = getDefaultPatients();
+    caregivers = getDefaultCaregivers();
+    EVENTOS = getDefaultEventos();
+    TAREAS = getDefaultTareas();
+    closeModal();
+    hideFlowExtras();
+
+    statusbar.style.background = '#3F6455';
+    statusbar.innerHTML = '<span>10:41</span>' +
+      '<div style="display:flex;gap:5px;align-items:center;">' +
+        '<i class="ti ti-antenna-bars-5" style="font-size:14px;" aria-hidden="true"></i>' +
+        '<i class="ti ti-wifi" style="font-size:14px;" aria-hidden="true"></i>' +
+        '<i class="ti ti-battery-4" style="font-size:14px;" aria-hidden="true"></i>' +
+      '</div>';
+
+    waheader.style.background = '#3F6455';
+    waheader.style.borderBottom = 'none';
+    waheader.onclick = null;
+    waheader.innerHTML = '<i class="ti ti-arrow-left" style="color:#FFFFFF;font-size:20px;" aria-hidden="true"></i>' +
+      '<div style="width:38px;height:38px;border-radius:50%;background:#EFECF8;display:flex;align-items:center;justify-content:center;font-weight:500;font-size:14px;color:#3F6455;flex-shrink:0;">M</div>' +
+      '<div style="flex:1;min-width:0;">' +
+        '<div style="color:#FFFFFF;font-size:15px;font-weight:500;">Memo</div>' +
+        '<div style="color:#E6F2ED;font-size:12px;">en línea</div>' +
+      '</div>' +
+      '<i class="ti ti-video" style="color:#FFFFFF;font-size:19px;" aria-hidden="true"></i>' +
+      '<i class="ti ti-phone" style="color:#FFFFFF;font-size:18px;margin-left:12px;" aria-hidden="true"></i>';
+
+    inputbar.style.display = 'flex';
+    appnavbar.style.display = 'none';
+    document.getElementById('hint').style.display = 'block';
+    resetComposer();
+
+    wabody.style.background = '#E5DDD5';
+    wabody.innerHTML = '';
+    wabody.onclick = null;
+    openChat();
+  }
+
+  document.getElementById('reset-btn').onclick = resetSim;
+  openChat();
+})();
+</script>
 </body>
 </html>
